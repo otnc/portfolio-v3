@@ -12,8 +12,34 @@ const { repoUrl = 'https://github.com/otnc' } = Astro.props;
 		<a href={repoUrl} target="_blank" rel="noopener noreferrer">
 			&copy; まろん｡ - All rights reserved.
 		</a>
+		<div class="access-counter" aria-label="アクセスカウンター">
+			<span class="access-counter-label">Access Counter</span>
+			<span class="access-counter-digits" id="access-counter-digits" aria-live="polite">
+				------
+			</span>
+		</div>
 	</div>
 </footer>
+
+<script>
+	async function updateAccessCounter() {
+		const el = document.getElementById('access-counter-digits');
+		if (!el) return;
+
+		try {
+			const response = await fetch('/api/counter', { method: 'POST' });
+			if (!response.ok) throw new Error('failed to increment counter');
+			const data: { count?: unknown } = await response.json();
+			if (typeof data.count === 'number') {
+				el.textContent = String(data.count).padStart(6, '0');
+			}
+		} catch {
+			// カウンター取得に失敗しても表示を崩さないよう、何もしない(プレースホルダーのまま)。
+		}
+	}
+
+	updateAccessCounter();
+</script>
 
 <style>
 	.footer {
@@ -35,5 +61,32 @@ const { repoUrl = 'https://github.com/otnc' } = Astro.props;
 
 	.footer-contents a:hover {
 		text-decoration: underline;
+	}
+
+	/* 昔懐かしいアクセスカウンター風のデジタル表示。 */
+	.access-counter {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 10px;
+	}
+
+	.access-counter-label {
+		font-size: 11px;
+		letter-spacing: 0.05em;
+		opacity: 0.6;
+	}
+
+	.access-counter-digits {
+		padding: 2px 6px;
+		border-radius: 3px;
+		background-color: #0b0f0a;
+		color: #4dff6b;
+		font-family: 'Courier New', Courier, monospace;
+		font-size: 15px;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: 0.12em;
+		text-shadow: 0 0 6px rgba(77, 255, 107, 0.75);
 	}
 </style>

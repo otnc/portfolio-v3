@@ -5,6 +5,7 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono } from 'hono';
 import { env } from './lib/env.js';
 import { scheduleRefresh, warmCache } from './lib/cache.js';
+import { counterRoute } from './routes/counter.js';
 import { faviconRoute } from './routes/favicon.js';
 import { githubRoute } from './routes/github.js';
 import { contributionsRoute, worksRoute } from './routes/works.js';
@@ -15,6 +16,7 @@ app.route('/api/github', githubRoute);
 app.route('/api/works', worksRoute);
 app.route('/api/contributions', contributionsRoute);
 app.route('/api/favicon', faviconRoute);
+app.route('/api/counter', counterRoute);
 
 // Astro のビルド成果物 (dist/) をそのまま配信する。
 app.use('*', serveStatic({ root: env.staticDir }));

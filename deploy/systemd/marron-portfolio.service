@@ -20,10 +20,10 @@ ExecStart=/usr/bin/node dist/index.js
 Restart=on-failure
 RestartSec=5
 
-# 軽い sandboxing。GitHub API 通信とファイルキャッシュ書き込みだけ許可すればよい。
+# 軽い sandboxing。GitHub API 通信とファイルキャッシュ・永続データの書き込みだけ許可すればよい。
 NoNewPrivileges=true
 ProtectSystem=strict
-ReadWritePaths=/opt/marron-portfolio/server/cache
+ReadWritePaths=/opt/marron-portfolio/server/cache /opt/marron-portfolio/server/data
 PrivateTmp=true
 
 [Install]
