@@ -1,5 +1,6 @@
 ---
 import SectionHeading from '../parts/SectionHeading.astro';
+import { formatNumber } from '../../lib/format';
 import type { GithubActivity } from '../../lib/githubActivity';
 
 interface Props {
@@ -18,7 +19,11 @@ const maxCommitCount = activity ? Math.max(1, ...activity.commitActivity.map((da
 	{activity ? (
 		<div class="card">
 			<div class="contributions-hero">
-				<p class="hero-value">{activity.profile.totalContributions ?? '—'}</p>
+				<p class="hero-value">
+					{activity.profile.totalContributions !== null
+						? formatNumber(activity.profile.totalContributions)
+						: '—'}
+				</p>
 				<p class="hero-label">
 					Total Contributions
 					{activity.profile.totalContributions === null && <span class="hero-note">(近日対応)</span>}
@@ -27,15 +32,15 @@ const maxCommitCount = activity ? Math.max(1, ...activity.commitActivity.map((da
 
 			<div class="stats-grid">
 				<div class="stat">
-					<p class="value">{activity.profile.followers}</p>
+					<p class="value">{formatNumber(activity.profile.followers)}</p>
 					<p class="label">Followers</p>
 				</div>
 				<div class="stat">
-					<p class="value">{activity.profile.publicRepos}</p>
+					<p class="value">{formatNumber(activity.profile.publicRepos)}</p>
 					<p class="label">Public Repos</p>
 				</div>
 				<div class="stat">
-					<p class="value">{activity.profile.totalStars}</p>
+					<p class="value">{formatNumber(activity.profile.totalStars)}</p>
 					<p class="label">Total Stars</p>
 				</div>
 			</div>

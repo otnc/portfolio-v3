@@ -1,4 +1,6 @@
 ---
+import { formatNumber } from '../../lib/format';
+
 interface Props {
 	repo: string;
 	url: string;
@@ -15,12 +17,12 @@ const { repo, url, mergedCount, stars } = Astro.props;
 		{typeof stars === 'number' && (
 			<span class="stars">
 				<span aria-hidden="true">★</span>
-				{stars}
+				{formatNumber(stars)}
 			</span>
 		)}
 		<span class="merged">
 			<span aria-hidden="true">⇄</span>
-			{mergedCount} merged
+			{formatNumber(mergedCount)} merged
 		</span>
 	</div>
 </a>

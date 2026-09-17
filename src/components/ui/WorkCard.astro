@@ -1,4 +1,5 @@
 ---
+import { formatNumber } from '../../lib/format';
 import type { LanguageStat } from '../../lib/github';
 
 interface Props {
@@ -41,7 +42,7 @@ const primaryLanguage =
 	{typeof stars === 'number' && (
 		<span class="stars">
 			<span aria-hidden="true">★</span>
-			{stars}
+			{formatNumber(stars)}
 		</span>
 	)}
 </a>
