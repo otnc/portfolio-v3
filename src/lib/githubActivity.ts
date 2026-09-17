@@ -1,6 +1,5 @@
-// 自前の server/ (Hono, github-most-used-langs 互換 + 全期間コントリビュート対応)
-// を立てたらそちらを指す。未設定時は暫定で montblank.fun の既存APIにフォールバック。
-const API_URL = import.meta.env.GITHUB_ACTIVITY_API_URL ?? 'https://github-most-used-langs.montblank.fun/';
+// server/ (Hono, github-most-used-langs 互換 + 全期間コントリビュート対応) のAPIを常に使う。
+const API_URL = 'http://127.0.0.1:3000/api/github/otnc';
 
 export interface GithubProfileStats {
 	login: string;
@@ -9,8 +8,6 @@ export interface GithubProfileStats {
 	followers: number;
 	publicRepos: number;
 	totalStars: number;
-	// server/ 側(自前API)なら常に数値が入る。外部APIにフォールバックしている間は
-	// まだ対応していないため null になる。
 	totalContributions: number | null;
 }
 

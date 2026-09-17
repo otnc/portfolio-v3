@@ -5,8 +5,7 @@ const SEARCH_ISSUES_URL = 'https://api.github.com/search/issues';
 const PINNED_API_URL = 'https://pinned.berrysauce.dev/get';
 const UNGH_API_URL = 'https://ungh.cc';
 
-// .env に GITHUB_TOKEN を置いておくと、開発時など未認証レート制限に
-// 引っかかりやすい場面で認証済みリクエストとして送られる(必須ではない)。
+// .env に GITHUB_TOKEN を置いておくと、開発時など未認証レート制限に引っかかりやすい場面で認証済みリクエストとして送られる(必須ではない)。
 function githubHeaders(): HeadersInit {
 	const token = import.meta.env.GITHUB_TOKEN;
 	const headers: Record<string, string> = { Accept: 'application/vnd.github+json' };
@@ -87,10 +86,8 @@ async function fetchAllRepos(user: string): Promise<Repo[]> {
 	}
 }
 
-// GitHub には固定(ピン留め)リポジトリを取得する公式APIがないため、
-// 非公式API (pinned.berrysauce.dev) から owner/repo 単位で取得する。
-// 自分がオーナーでないリポジトリ(fork/所属先など)が固定されている場合もあるため、
-// author を保持して正しいリポジトリを指す。
+// GitHub には固定(ピン留め)リポジトリを取得する公式APIがないため、非公式API (pinned.berrysauce.dev) から owner/repo 単位で取得する。
+// 自分がオーナーでないリポジトリ(fork/所属先など)が固定されている場合もあるため、author を保持して正しいリポジトリを指す。
 async function fetchPinnedRepos(user: string): Promise<Repo[]> {
 	try {
 		const response = await fetch(`${PINNED_API_URL}/${user}`);
@@ -124,8 +121,7 @@ async function fetchPinnedRepos(user: string): Promise<Repo[]> {
 }
 
 // 可能な場合は言語ごとのバイト数から使用割合を計算する。
-// レート制限等で取れない場合は null を返し、呼び出し側は
-// 検索結果に含まれる最多言語(topLanguage)だけの表示にフォールバックする。
+// レート制限等で取れない場合は null を返し、呼び出し側は検索結果に含まれる最多言語(topLanguage)だけの表示にフォールバックする。
 async function fetchLanguageBreakdown(owner: string, name: string): Promise<LanguageStat[] | null> {
 	try {
 		// 言語ごとのバイト内訳は ungh.cc に無いため、ここだけは GitHub 本家を叩く。
@@ -172,10 +168,8 @@ interface SearchIssueItem {
 	repository_url?: unknown;
 }
 
-// GitHub 本家はレート制限が厳しいので、単純なスター数取得は
-// キャッシュ済みの ungh.cc 経由にして制限を回避する。
-// それでも取得できないことはあるため、失敗時は 0 と偽らず null を返す
-// (呼び出し側で「不明」として扱い、表示や並び順から除外する)。
+// GitHub 本家はレート制限が厳しいので、単純なスター数取得はキャッシュ済みの ungh.cc 経由にして制限を回避する。
+// それでも取得できないことはあるため、失敗時は 0 と偽らず null を返す(呼び出し側で「不明」として扱い、表示や並び順から除外する)。
 async function fetchRepoStars(owner: string, name: string): Promise<number | null> {
 	try {
 		const response = await fetch(`${UNGH_API_URL}/repos/${owner}/${name}`);
@@ -189,11 +183,8 @@ async function fetchRepoStars(owner: string, name: string): Promise<number | nul
 	}
 }
 
-// フォークして送った Pull Request が、外部(自分以外が所有する)リポジトリで
-// マージされたものを集計する。GitHub に専用APIは無いため、
-// Issues/PR検索の `is:merged` + 自分のリポジトリを除外する条件で代用する。
-// 規模(スター数)が大きいプロジェクト順に並べたいので、集計後に
-// それぞれのリポジトリのスター数を取得してソートし直す。
+// フォークして送った Pull Request が、外部(自分以外が所有する)リポジトリでマージされたものを集計する。GitHub に専用APIは無いため、Issues/PR検索の `is:merged` + 自分のリポジトリを除外する条件で代用する。
+// 規模(スター数)が大きいプロジェクト順に並べたいので、集計後にそれぞれのリポジトリのスター数を取得してソートし直す。
 export async function fetchMergedContributions(user: string): Promise<Contribution[]> {
 	try {
 		const query = `type:pr+author:${user}+is:merged+-user:${user}`;
@@ -220,8 +211,7 @@ export async function fetchMergedContributions(user: string): Promise<Contributi
 			}),
 		);
 
-		// スター数が不明なもの(取得失敗)は末尾に回し、既知の値同士はスター数、
-		// 同数ならマージ数で比較する。
+		// スター数が不明なもの(取得失敗)は末尾に回し、既知の値同士はスター数、同数ならマージ数で比較する。
 		return contributions.sort((a, b) => {
 			if (a.stars === null && b.stars === null) return b.mergedCount - a.mergedCount;
 			if (a.stars === null) return 1;

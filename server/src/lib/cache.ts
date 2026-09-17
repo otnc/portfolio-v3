@@ -12,8 +12,7 @@ function cacheFilePath(user: string): string {
 	return path.join(CACHE_DIR, `github-${user}.json`);
 }
 
-// user -> 最新の集計結果。バックグラウンド更新中もこの参照から
-// 常に(多少古くても)即答できるようにする。
+// user -> 最新の集計結果。バックグラウンド更新中もこの参照から常に(多少古くても)即答できるようにする。
 const memoryCache = new Map<string, GithubActivityPayload>();
 const inFlight = new Map<string, Promise<GithubActivityPayload>>();
 
@@ -61,8 +60,7 @@ function isStale(payload: GithubActivityPayload): boolean {
 	return age > payload.meta.ttl_seconds * 1000;
 }
 
-// キャッシュを実際に再計算する。同時に複数リクエストが来ても
-// 二重に GitHub へ問い合わせないよう in-flight Promise を共有する。
+// キャッシュを実際に再計算する。同時に複数リクエストが来ても二重に GitHub へ問い合わせないよう in-flight Promise を共有する。
 async function refresh(user: string): Promise<GithubActivityPayload> {
 	const existing = inFlight.get(user);
 	if (existing) return existing;
@@ -83,8 +81,7 @@ async function refresh(user: string): Promise<GithubActivityPayload> {
 }
 
 // リクエストからは常にキャッシュを即座に返す。
-// 無ければ初回のみ待つ。古くなっていたら裏で再取得しつつ、
-// 取得済みの(少し古い)値をそのまま返す(stale-while-revalidate)。
+// 無ければ初回のみ待つ。古くなっていたら裏で再取得しつつ、取得済みの(少し古い)値をそのまま返す(stale-while-revalidate)。
 // 再取得に失敗しても、既存のキャッシュがあればそれを返し続ける(stale-if-error)。
 export async function getGithubActivity(user: string): Promise<GithubActivityPayload> {
 	let payload = memoryCache.get(user) ?? (await loadFromDisk(user)) ?? undefined;

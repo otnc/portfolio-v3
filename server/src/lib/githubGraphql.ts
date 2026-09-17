@@ -28,8 +28,7 @@ async function graphql<T>(query: string, variables: Record<string, unknown>): Pr
 	return json.data;
 }
 
-// --- プロフィール + 公開リポジトリの言語内訳(スター数・フォロワー数込み)を
-//     ページネーションしながら1種類のクエリで取得する ---
+// --- プロフィール + 公開リポジトリの言語内訳(スター数・フォロワー数込み)をページネーションしながら1種類のクエリで取得する ---
 
 interface RepoLanguagesPage {
 	user: {
@@ -151,9 +150,7 @@ export async function fetchProfileAndLanguages(login: string): Promise<{
 }
 
 // --- 全期間の総コントリビュート数 ---
-// GraphQL の contributionsCollection は1回のクエリで最大1年分しか
-// 取得できないため、アカウント作成年〜現在の年まで、エイリアスを使って
-// 1回のリクエストにまとめて問い合わせる。
+// GraphQL の contributionsCollection は1回のクエリで最大1年分しか取得できないため、アカウント作成年〜現在の年まで、エイリアスを使って1回のリクエストにまとめて問い合わせる。
 
 interface AllTimeContributionsResult {
 	[alias: string]: { contributionCalendar: { totalContributions: number } };

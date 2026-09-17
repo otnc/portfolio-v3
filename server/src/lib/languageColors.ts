@@ -1,7 +1,5 @@
 // GitHub Linguist の色を一部抜粋(なければ中間グレーにフォールバック)。
-// フロントエンド側 (src/lib/languageColors.ts) と同じ考え方だが、
-// GraphQL の repository.languages が色そのものも返すので、
-// 基本的にはそちらを優先し、これは取れなかった時の保険として使う。
+// フロントエンド側 (src/lib/languageColors.ts) と同じ考え方だが、GraphQL の repository.languages が色そのものも返すので、基本的にはそちらを優先し、これは取れなかった時の保険として使う。
 const LANGUAGE_COLORS: Record<string, string> = {
 	TypeScript: '#3178c6',
 	JavaScript: '#f1e05a',

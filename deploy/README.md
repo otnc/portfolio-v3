@@ -63,21 +63,10 @@ npm ci && npm run build          # Astro を再ビルド
 sudo systemctl restart marron-portfolio   # 新しい dist/ を配信し直す
 ```
 
-`GITHUB_ACTIVITY_API_URL` を `server/`自身のURL (例:
-`http://127.0.0.1:3000/api/github/otnc`) に設定しておくと、Astro の
-ビルド時点で自前APIから直接データを取得できる。ビルド前に
-`marron-portfolio` サービスが起動している必要がある点に注意。
+Astro は `server/`自身のURL (`http://127.0.0.1:3000/api/github/otnc`) を常に参照するため、ビルド時点で自前APIから直接データを取得できる。ビルド前に `marron-portfolio` サービスが起動している必要がある点に注意。
 
 ## ポイント
 
-- **Hono側でdist/を配信する理由**: nginxを二重に挟まず、静的配信とAPIを
-  1プロセスに集約してシンプルに保つため。
-- **GitHub活動集計 (`/api/github/:user`)**: `otnc/github-most-used-langs`
-  の考え方(言語内訳・プロフィール統計・日次アクティビティ)を Hono +
-  GitHub GraphQL API で再実装し、GraphQL の `contributionsCollection`
-  をアカウント作成年〜現在年まで1リクエストにまとめて問い合わせることで
-  **全期間の総コントリビュート数** を新たに算出している
-  (`server/src/lib/githubGraphql.ts` の `fetchAllTimeContributions`)。
-- **キャッシュ**: ファイルキャッシュ + stale-while-revalidate。起動時と
-  `REFRESH_INTERVAL_MS` 間隔で裏更新し、GitHub側の障害時は直近の
-  キャッシュを返し続ける(stale-if-error)。
+- **Hono側でdist/を配信する理由**: nginxを二重に挟まず、静的配信とAPIを1プロセスに集約してシンプルに保つため。
+- **GitHub活動集計 (`/api/github/:user`)**: `otnc/github-most-used-langs` の考え方(言語内訳・プロフィール統計・日次アクティビティ)を Hono + GitHub GraphQL API で再実装し、GraphQL の `contributionsCollection` をアカウント作成年〜現在年まで1リクエストにまとめて問い合わせることで**全期間の総コントリビュート数**を新たに算出している(`server/src/lib/githubGraphql.ts` の `fetchAllTimeContributions`)。
+- **キャッシュ**: ファイルキャッシュ + stale-while-revalidate。起動時と `REFRESH_INTERVAL_MS` 間隔で裏更新し、GitHub側の障害時は直近のキャッシュを返し続ける(stale-if-error)。
