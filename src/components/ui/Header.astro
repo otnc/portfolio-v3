@@ -28,16 +28,32 @@
 	updateHeaderHeight();
 	window.addEventListener('resize', updateHeaderHeight);
 
+	// 6桁(999,999)を超えたら、他の数値表示と同じ3桁区切り表記に切り替える。
+	// ゼロ埋めの固定幅ではなくなるが、表示が壊れることはない。
+	function formatCounter(count: number): string {
+		if (count < 1_000_000) return String(count).padStart(6, '0');
+		return count.toLocaleString('en-US');
+	}
+
 	async function updateAccessCounter() {
 		const el = document.getElementById('access-counter-digits');
 		if (!el) return;
 
+		// 同じタブ内での再読み込みで無駄に増えないよう、1セッションにつき
+		// 一度だけ加算する。2回目以降は現在値を参照するだけにする。
+		// sessionStorageが使えない環境(プライベートブラウジング等)でも
+		// 壊れないよう、まとめてtry/catchする。
+		const SESSION_KEY = 'marron-portfolio-access-counted';
 		try {
-			const response = await fetch('/api/counter', { method: 'POST' });
-			if (!response.ok) throw new Error('failed to increment counter');
+			const alreadyCounted = sessionStorage.getItem(SESSION_KEY) === '1';
+			const method = alreadyCounted ? 'GET' : 'POST';
+
+			const response = await fetch('/api/counter', { method });
+			if (!response.ok) throw new Error('failed to fetch counter');
 			const data: { count?: unknown } = await response.json();
 			if (typeof data.count === 'number') {
-				el.textContent = String(data.count).padStart(6, '0');
+				el.textContent = formatCounter(data.count);
+				if (!alreadyCounted) sessionStorage.setItem(SESSION_KEY, '1');
 			}
 		} catch {
 			// カウンター取得に失敗しても表示を崩さないよう、何もしない(プレースホルダーのまま)。
