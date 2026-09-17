@@ -267,7 +267,9 @@ async function fetchRepoStars(owner: string, name: string): Promise<number | nul
 export async function getMergedContributions(user: string): Promise<Contribution[]> {
 	return cached('contributions', user, WORKS_TTL_MS, async () => {
 		try {
-			const query = `type:pr+author:${user}+is:merged+-user:${user}`;
+			// ofetchの query オプションは値をそのままURLエンコードするため、+ 区切りだと
+			// リテラルの "+" として送られてしまう(スペースとして解釈されない)。単語区切りは半角スペースにする。
+			const query = `type:pr author:${user} is:merged -user:${user}`;
 			const data = await ofetch<{ items?: SearchIssueItem[] }>(SEARCH_ISSUES_URL, {
 				query: { q: query, per_page: 100 },
 				headers: githubHeaders(),
