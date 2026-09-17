@@ -1,7 +1,7 @@
 import { ofetch } from 'ofetch';
 
-// GitHub Linguist の色一覧(有志によるJSONミラー)。
-// フロントエンド側 (src/lib/languageColors.ts) と同じ考え方だが、GraphQL の repository.languages が色そのものも返すので、基本的にはそちらを優先し、これは取れなかった時の保険として使う。
+// GitHub Linguist の色一覧(有志によるJSONミラー)。GraphQL の repository.languages が
+// 色そのものも返すので基本的にはそちらを優先し、これは取れなかった時の保険として使う。
 const COLORS_URL = 'https://raw.githubusercontent.com/ozh/github-colors/master/colors.json';
 const COLORS_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -19,7 +19,12 @@ async function loadColorMap(): Promise<Record<string, string>> {
 	}
 
 	try {
-		const raw = await ofetch<Record<string, RawColorEntry>>(COLORS_URL);
+		// raw.githubusercontent.com は Content-Type: text/plain で返すため、ofetchの
+		// 自動判定に任せず明示的にJSONとしてパースする(大きめのファイルだと自動判定に失敗し、
+		// 生の文字列のまま返ってきてしまうことがある)。
+		const raw = await ofetch<Record<string, RawColorEntry>>(COLORS_URL, {
+			parseResponse: JSON.parse,
+		});
 		const colors: Record<string, string> = {};
 		for (const [name, entry] of Object.entries(raw)) {
 			if (typeof entry.color === 'string') colors[name] = entry.color;
