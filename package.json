@@ -20,14 +20,14 @@
 	"dependencies": {
 		"astro": "^7.3.3",
 		"fast-xml-parser": "^5.11.1",
-		"ofetch": "^1.4.1",
+		"ofetch": "^1.5.1",
 		"simple-icons": "^16.31.0",
 		"subset-font": "^2.7.0"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
 		"astro-eslint-parser": "^3.1.0",
-		"concurrently": "^9.2.1",
+		"concurrently": "^10.0.5",
 		"eslint": "^10.10.0",
 		"eslint-config-prettier": "^10.1.8",
 		"eslint-plugin-astro": "^3.2.1",

@@ -6,3 +6,4 @@ minimumReleaseAgeExclude:
   - astro@7.3.3
   - eslint-plugin-astro@3.2.1
   - prettier-plugin-astro@1.0.1
+  - user-agents@2.1.186
