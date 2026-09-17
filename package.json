@@ -7,17 +7,20 @@
   },
   "packageManager": "pnpm@11.25.0",
   "scripts": {
-    "dev": "astro dev",
+    "dev": "concurrently -n astro,server -c cyan,magenta \"astro dev\" \"pnpm --filter marron-portfolio-server dev\"",
+    "dev:astro": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {
     "astro": "^7.3.3",
-    "cheerio": "^1.0.0",
     "fast-xml-parser": "^5.11.1",
     "ofetch": "^1.4.1",
     "simple-icons": "^16.31.0",
     "subset-font": "^2.7.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

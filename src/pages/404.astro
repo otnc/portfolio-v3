@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Button from '../components/parts/Button.astro';
+---
+
+<BaseLayout title="404 Not Found | まろん｡のポートフォリオ">
+	<div class="not-found">
+		<p class="code">404</p>
+		<p class="message">お探しのページは見つかりませんでした。</p>
+		<Button href="/" variant="primary">トップページへ戻る</Button>
+	</div>
+</BaseLayout>
+
+<style>
+	.not-found {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+		min-height: 60vh;
+		padding: 48px 20px;
+		text-align: center;
+	}
+
+	.code {
+		margin: 0;
+		font-size: 64px;
+		font-weight: 700;
+		background: var(--color-accent-gradient);
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+	}
+
+	.message {
+		margin: 0 0 8px;
+		color: var(--color-text-light);
+		font-size: 15px;
+	}
+</style>

@@ -16,6 +16,12 @@ interface Props {
 }
 
 const { links, applyUrl, requirements } = Astro.props;
+
+// サムネイルが個別指定されていない場合は、サーバー経由でfaviconを取得・配信するAPIを使う
+// (ブラウザから直接相手サイトを叩かせない)。
+function iconSrcFor(link: CrossLink): string {
+	return link.thumbnail ?? `/api/favicon?url=${encodeURIComponent(link.url)}`;
+}
 ---
 
 <section class="cross-links-section">
@@ -23,7 +29,7 @@ const { links, applyUrl, requirements } = Astro.props;
 	<div class="card">
 		<p class="subtitle">相互リンクの一覧です。</p>
 		<div class="links scrollbox">
-			{links.map((link) => <LinkCard title={link.author} url={link.url} iconSrc={link.thumbnail} />)}
+			{links.map((link) => <LinkCard title={link.author} url={link.url} iconSrc={iconSrcFor(link)} />)}
 		</div>
 
 		<div class="apply">
