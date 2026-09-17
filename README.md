@@ -1,43 +1,41 @@
-# Astro Starter Kit: Minimal
+# portfolio-v3
+
+まろん｡([montblank.fun](https://montblank.fun)) のポートフォリオサイト。Astro (静的サイト) + Hono (GitHub活動集計API) の pnpm workspace 構成。
+
+## 構成
+
+```
+/                 Astro (静的サイト本体)
+├── src/          ページ・コンポーネント・GitHub連携クライアントなど
+├── public/       静的アセット
+├── integrations/ 独自Astroインテグレーション(フォントサブセット化)
+└── server/       Hono製サーバー (dist/配信 + /api/github, /api/works, /api/contributions, /api/favicon)
+```
+
+`server/` はビルド成果物 (`dist/`) の配信と、GitHub関連データの取得・キャッシュを一手に担う。Astro側は外部サイトを直接叩かず、常に `server/` 経由でデータを取得する(詳細は各モジュールのコメントを参照)。
+
+## セットアップ
 
 ```sh
-npm create astro@latest -- --template minimal
+pnpm install
+cd server && cp .env.example .env && $EDITOR .env   # GITHUB_TOKEN などを設定
+cd ..
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## コマンド
 
-## 🚀 Project Structure
+| コマンド            | 内容                                                       |
+| :------------------ | :--------------------------------------------------------- |
+| `pnpm dev`          | Astro dev serverとHono serverを同時起動 (`localhost:4321`) |
+| `pnpm build`        | Astroを `./dist/` にビルド                                 |
+| `pnpm preview`      | ビルド結果をローカルでプレビュー                           |
+| `pnpm lint`         | ESLintでチェック                                           |
+| `pnpm lint:fix`     | ESLintで自動修正                                           |
+| `pnpm format`       | Prettierで整形                                             |
+| `pnpm format:check` | Prettierの整形チェックのみ                                 |
 
-Inside of your Astro project, you'll see the following folders and files:
+`server/` 単体のコマンド (`pnpm --filter marron-portfolio-server <script>`) は `server/package.json` を参照。
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## デプロイ
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
-
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
-
-Any static assets, like images, can be placed in the `public/` directory.
-
-## 🧞 Commands
-
-All commands are run from the root of the project, from a terminal:
-
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+VPS上でのデプロイ手順は [`deploy/README.md`](./deploy/README.md) を参照。
