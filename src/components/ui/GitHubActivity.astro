@@ -126,6 +126,18 @@ const maxCommitCount = activity ? Math.max(1, ...activity.commitActivity.map((da
 		gap: 12px;
 	}
 
+	/* 幅の狭いモバイルでは2列になり、3つ目(Total Stars)だけ左寄りに余ってしまうため、
+	   その行を全幅にして中央寄せする。 */
+	@media screen and (width <= 480px) {
+		.stats-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+
+		.stat:last-child {
+			grid-column: 1 / -1;
+		}
+	}
+
 	.stat {
 		padding: 14px 10px;
 		border-radius: var(--radius-sm);
