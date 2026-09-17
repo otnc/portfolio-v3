@@ -29,7 +29,9 @@ function iconSrcFor(link: CrossLink): string {
 	<div class="card">
 		<p class="subtitle">相互リンクの一覧です。</p>
 		<div class="links scrollbox">
-			{links.map((link) => <LinkCard title={link.author} url={link.url} iconSrc={iconSrcFor(link)} />)}
+			{links.map((link) => (
+				<LinkCard title={link.author} url={link.url} iconSrc={iconSrcFor(link)} />
+			))}
 		</div>
 
 		<div class="apply">

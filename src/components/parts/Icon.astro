@@ -9,15 +9,13 @@ interface Props {
 const { src, alt = '', size = '100%', initial = '?' } = Astro.props;
 ---
 
-{
-	src ? (
-		<img class="icon" src={src} alt={alt} style={{ width: size, height: size }} />
-	) : (
-		<div class="icon icon-fallback" style={{ width: size, height: size }} aria-hidden={alt === ''}>
-			{initial}
-		</div>
-	)
-}
+{src ? (
+	<img class="icon" src={src} alt={alt} style={{ width: size, height: size }} />
+) : (
+	<div class="icon icon-fallback" style={{ width: size, height: size }} aria-hidden={alt === ''}>
+		{initial}
+	</div>
+)}
 
 <style>
 	.icon {

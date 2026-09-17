@@ -3,16 +3,12 @@ import { ofetch } from 'ofetch';
 import { env } from './env.js';
 import { getLanguageColor } from './languageColors.js';
 import { cached } from './simpleCache.js';
+import { getBrowserUserAgent } from './userAgent.js';
 
 const SEARCH_REPOS_URL = 'https://api.github.com/search/repositories';
 const SEARCH_ISSUES_URL = 'https://api.github.com/search/issues';
 const PINNED_API_URL = 'https://pinned.berrysauce.dev/get';
 const UNGH_API_URL = 'https://ungh.cc';
-
-// プロフィールページのHTML解析は、GitHub本家に人間のブラウザとして振る舞う必要があるため、
-// UAを偽装する。api.github.com 側は Accept ヘッダで十分。
-const BROWSER_USER_AGENT =
-	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
 
 const WORKS_TTL_MS = 12 * 60 * 60 * 1000;
 
@@ -72,9 +68,7 @@ async function fetchAllRepos(user: string): Promise<Repo[]> {
 					url: String(item.html_url ?? ''),
 					description: String(item.description ?? ''),
 					stars: Number(item.stargazers_count ?? 0),
-					topLanguage: language
-						? { name: language, color: await getLanguageColor(language) }
-						: undefined,
+					topLanguage: language ? { name: language, color: await getLanguageColor(language) } : undefined,
 				};
 			}),
 		);
@@ -108,7 +102,7 @@ function parseCompactNumber(text: string): number | null {
 async function scrapePinnedRepos(user: string): Promise<Repo[]> {
 	const html = await ofetch(`https://github.com/${user}`, {
 		responseType: 'text',
-		headers: { 'User-Agent': BROWSER_USER_AGENT },
+		headers: { 'User-Agent': getBrowserUserAgent() },
 	});
 	const $ = cheerio.load(html);
 

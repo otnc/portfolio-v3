@@ -15,17 +15,15 @@ const serviceIcon = iconSlug ? getServiceIcon(iconSlug) : undefined;
 
 <a class="link-card" href={url} target="_blank" rel="noopener noreferrer">
 	<div class="link-icon">
-		{
-			serviceIcon ? (
-				<span
-					class="service-icon"
-					style={{ backgroundColor: `#${serviceIcon.hex}1a`, color: `#${serviceIcon.hex}` }}
-					set:html={serviceIcon.svg}
-				/>
-			) : (
-				<Icon src={iconSrc} alt="" size="36px" initial={title.charAt(0)} />
-			)
-		}
+		{serviceIcon ? (
+			<span
+				class="service-icon"
+				style={{ backgroundColor: `#${serviceIcon.hex}1a`, color: `#${serviceIcon.hex}` }}
+				set:html={serviceIcon.svg}
+			/>
+		) : (
+			<Icon src={iconSrc} alt="" size="36px" initial={title.charAt(0)} />
+		)}
 	</div>
 	<div class="info">
 		<p class="title">{title}</p>

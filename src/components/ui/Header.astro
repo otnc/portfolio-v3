@@ -1,7 +1,4 @@
 ---
-import Button from '../parts/Button.astro';
-
-const navLinks = [{ href: '/about', label: 'About' }];
 ---
 
 <header class="header">
@@ -10,15 +7,6 @@ const navLinks = [{ href: '/about', label: 'About' }];
 			<a href="/" class="brand">
 				<img src="/logo.png" alt="まろん｡" class="brand-logo" />
 			</a>
-			<nav class="nav-group">
-				{
-					navLinks.map((link) => (
-						<Button href={link.href} variant="nav">
-							{link.label}
-						</Button>
-					))
-				}
-			</nav>
 		</div>
 	</div>
 </header>
@@ -60,12 +48,6 @@ const navLinks = [{ href: '/about', label: 'About' }];
 		flex-wrap: wrap;
 		gap: 10px;
 		margin: 16px 20px;
-	}
-
-	.nav-group {
-		display: flex;
-		align-items: center;
-		gap: 20px;
 	}
 
 	.brand {

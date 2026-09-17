@@ -33,21 +33,20 @@ export interface GithubActivity {
 
 export async function fetchGithubActivity(): Promise<GithubActivity | null> {
 	try {
-		const data = await ofetch<Record<string, any>>(API_URL);
-		if (!data?.profile) return null;
+		const data = await ofetch<Record<string, unknown>>(API_URL);
+		if (!data?.profile || typeof data.profile !== 'object') return null;
+		const profile = data.profile as Record<string, unknown>;
 
 		return {
 			profile: {
-				login: String(data.profile.login ?? ''),
-				htmlUrl: String(data.profile.html_url ?? ''),
-				avatarUrl: String(data.profile.avatar_url ?? ''),
-				followers: Number(data.profile.followers ?? 0),
-				publicRepos: Number(data.profile.public_repos ?? 0),
-				totalStars: Number(data.profile.total_stars ?? 0),
+				login: String(profile.login ?? ''),
+				htmlUrl: String(profile.html_url ?? ''),
+				avatarUrl: String(profile.avatar_url ?? ''),
+				followers: Number(profile.followers ?? 0),
+				publicRepos: Number(profile.public_repos ?? 0),
+				totalStars: Number(profile.total_stars ?? 0),
 				totalContributions:
-					typeof data.profile.total_contributions === 'number'
-						? data.profile.total_contributions
-						: null,
+					typeof profile.total_contributions === 'number' ? profile.total_contributions : null,
 			},
 			languages: Array.isArray(data.languages)
 				? data.languages.map((lang: Record<string, unknown>) => ({

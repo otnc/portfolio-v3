@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ErrorHero from '../components/ui/ErrorHero.astro';
+
+Astro.response.status = 418;
+Astro.response.statusText = "I'm a teapot";
+---
+
+<BaseLayout title="418 - I'm a teapot | まろん｡のポートフォリオ" description="I'm a teapot">
+	<ErrorHero
+		code="418"
+		title="I'm a teapot"
+		description="私はティーポットです。コーヒーを淹れることはできません。"
+		variant="teapot"
+	/>
+</BaseLayout>

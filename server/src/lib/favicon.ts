@@ -1,14 +1,11 @@
 import { lookup } from 'node:dns/promises';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { isIP } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as cheerio from 'cheerio';
 import { ofetch } from 'ofetch';
-
-// favicon取得先のサイトに人間のブラウザとして振る舞う。UAで弾く/出し分けるサイトがあるため。
-const BROWSER_USER_AGENT =
-	'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36';
+import isPrivateIp from 'private-ip';
+import { getBrowserUserAgent } from './userAgent.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = path.join(__dirname, '../../cache/favicon');
@@ -21,26 +18,6 @@ export interface FaviconResult {
 
 function cacheFilePath(pageUrl: string): string {
 	return path.join(CACHE_DIR, `${encodeURIComponent(pageUrl)}.json`);
-}
-
-function isPrivateIp(address: string): boolean {
-	const version = isIP(address);
-	if (version === 4) {
-		const [a, b] = address.split('.').map(Number);
-		return (
-			a === 127 ||
-			a === 10 ||
-			a === 0 ||
-			(a === 169 && b === 254) ||
-			(a === 172 && b >= 16 && b <= 31) ||
-			(a === 192 && b === 168)
-		);
-	}
-	if (version === 6) {
-		const lower = address.toLowerCase();
-		return lower === '::1' || lower.startsWith('fe80:') || lower.startsWith('fc') || lower.startsWith('fd');
-	}
-	return false;
 }
 
 // 任意のURLを受け取ってサーバー側から取得しに行くエンドポイントなので、
@@ -68,7 +45,7 @@ async function resolveFaviconUrl(pageUrl: string): Promise<string> {
 	try {
 		const html = await ofetch(pageUrl, {
 			responseType: 'text',
-			headers: { 'User-Agent': BROWSER_USER_AGENT },
+			headers: { 'User-Agent': getBrowserUserAgent() },
 		});
 		const $ = cheerio.load(html);
 		const href = $('link[rel~="icon"]').first().attr('href');
@@ -85,7 +62,7 @@ async function downloadFavicon(pageUrl: string): Promise<FaviconResult> {
 	await assertSafePublicUrl(faviconUrl);
 	const response = await ofetch.raw(faviconUrl, {
 		responseType: 'arrayBuffer',
-		headers: { 'User-Agent': BROWSER_USER_AGENT },
+		headers: { 'User-Agent': getBrowserUserAgent() },
 	});
 
 	const contentType = response.headers.get('content-type') ?? 'image/x-icon';

@@ -15,27 +15,29 @@ const { repos, profileUrl, profileUser } = Astro.props;
 
 <section class="work-section">
 	<SectionHeading>Works</SectionHeading>
-	{
-		repos.length > 0 ? (
-			<div class="repos card scrollbox">
-				{repos.map((repo) => (
-					<WorkCard
-						title={repo.owner === profileUser ? repo.name : `${repo.owner}/${repo.name}`}
-						url={repo.url}
-						description={repo.description}
-						stars={repo.stars}
-						pinned={repo.pinned}
-						languages={repo.languages}
-						topLanguage={repo.topLanguage}
-					/>
-				))}
-			</div>
-		) : (
-			<p class="empty">
-				リポジトリを取得できませんでした。<a href={profileUrl} target="_blank" rel="noopener noreferrer">GitHub</a>から確認してください。
-			</p>
-		)
-	}
+	{repos.length > 0 ? (
+		<div class="repos card scrollbox">
+			{repos.map((repo) => (
+				<WorkCard
+					title={repo.owner === profileUser ? repo.name : `${repo.owner}/${repo.name}`}
+					url={repo.url}
+					description={repo.description}
+					stars={repo.stars}
+					pinned={repo.pinned}
+					languages={repo.languages}
+					topLanguage={repo.topLanguage}
+				/>
+			))}
+		</div>
+	) : (
+		<p class="empty">
+			リポジトリを取得できませんでした。
+			<a href={profileUrl} target="_blank" rel="noopener noreferrer">
+				GitHub
+			</a>
+			から確認してください。
+		</p>
+	)}
 	<MoreLink href={`${profileUrl}?tab=repositories`} />
 </section>
 

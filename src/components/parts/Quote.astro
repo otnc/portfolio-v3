@@ -7,7 +7,9 @@ const { lines } = Astro.props;
 ---
 
 <blockquote class="quote">
-	{lines.map((line) => <p>{line}</p>)}
+	{lines.map((line) => (
+		<p>{line}</p>
+	))}
 </blockquote>
 
 <style>

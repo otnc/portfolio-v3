@@ -13,7 +13,8 @@ interface Props {
 
 const { title, url, description, stars, pinned, languages, topLanguage } = Astro.props;
 
-const primaryLanguage = languages?.[0] ?? (topLanguage ? { ...topLanguage, percentage: undefined } : undefined);
+const primaryLanguage =
+	languages?.[0] ?? (topLanguage ? { ...topLanguage, percentage: undefined } : undefined);
 ---
 
 <a class="work-card" href={url} target="_blank" rel="noopener noreferrer">
@@ -27,26 +28,22 @@ const primaryLanguage = languages?.[0] ?? (topLanguage ? { ...topLanguage, perce
 			{title}
 		</p>
 		{description && <p class="description">{description}</p>}
-		{
-			primaryLanguage && (
-				<span class="lang-label">
-					<span class="dot" style={{ backgroundColor: primaryLanguage.color }} />
-					{primaryLanguage.name}
-					{typeof primaryLanguage.percentage === 'number' && (
-						<span class="percentage">{primaryLanguage.percentage.toFixed(0)}%</span>
-					)}
-				</span>
-			)
-		}
-	</div>
-	{
-		typeof stars === 'number' && (
-			<span class="stars">
-				<span aria-hidden="true">★</span>
-				{stars}
+		{primaryLanguage && (
+			<span class="lang-label">
+				<span class="dot" style={{ backgroundColor: primaryLanguage.color }} />
+				{primaryLanguage.name}
+				{typeof primaryLanguage.percentage === 'number' && (
+					<span class="percentage">{primaryLanguage.percentage.toFixed(0)}%</span>
+				)}
 			</span>
-		)
-	}
+		)}
+	</div>
+	{typeof stars === 'number' && (
+		<span class="stars">
+			<span aria-hidden="true">★</span>
+			{stars}
+		</span>
+	)}
 </a>
 
 <style>

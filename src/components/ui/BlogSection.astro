@@ -14,22 +14,20 @@ const { posts, moreUrl } = Astro.props;
 
 <section class="blog-section">
 	<SectionHeading>Blog</SectionHeading>
-	{
-		posts.length > 0 ? (
-			<div class="posts card scrollbox">
-				{posts.map((post) => (
-					<BlogPostCard
-						title={post.title}
-						url={post.url}
-						description={post.description}
-						pubDate={post.pubDate}
-					/>
-				))}
-			</div>
-		) : (
-			<p class="empty">最新記事を取得できませんでした。</p>
-		)
-	}
+	{posts.length > 0 ? (
+		<div class="posts card scrollbox">
+			{posts.map((post) => (
+				<BlogPostCard
+					title={post.title}
+					url={post.url}
+					description={post.description}
+					pubDate={post.pubDate}
+				/>
+			))}
+		</div>
+	) : (
+		<p class="empty">最新記事を取得できませんでした。</p>
+	)}
 	<MoreLink href={moreUrl} />
 </section>
 

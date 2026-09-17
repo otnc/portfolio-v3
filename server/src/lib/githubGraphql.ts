@@ -54,13 +54,7 @@ const REPO_LANGUAGES_QUERY = /* GraphQL */ `
 			followers {
 				totalCount
 			}
-			repositories(
-				first: 100
-				after: $after
-				ownerAffiliations: OWNER
-				isFork: false
-				privacy: PUBLIC
-			) {
+			repositories(first: 100, after: $after, ownerAffiliations: OWNER, isFork: false, privacy: PUBLIC) {
 				pageInfo {
 					hasNextPage
 					endCursor
@@ -91,7 +85,7 @@ export async function fetchProfileAndLanguages(login: string): Promise<{
 	let totalStars = 0;
 	let repoCount = 0;
 	let after: string | null = null;
-	let profileInfo: RepoLanguagesPage['user'] | null = null;
+	let profileInfo: RepoLanguagesPage['user'];
 
 	do {
 		const page: RepoLanguagesPage = await graphql<RepoLanguagesPage>(REPO_LANGUAGES_QUERY, { login, after });
@@ -108,9 +102,7 @@ export async function fetchProfileAndLanguages(login: string): Promise<{
 			}
 		}
 
-		after = page.user.repositories.pageInfo.hasNextPage
-			? page.user.repositories.pageInfo.endCursor
-			: null;
+		after = page.user.repositories.pageInfo.hasNextPage ? page.user.repositories.pageInfo.endCursor : null;
 	} while (after);
 
 	const totalBytes = [...languageBytes.values()].reduce((sum, l) => sum + l.bytes, 0);

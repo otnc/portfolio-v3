@@ -15,80 +15,74 @@ const maxCommitCount = activity ? Math.max(1, ...activity.commitActivity.map((da
 
 <section class="github-activity-section">
 	<SectionHeading>GitHub</SectionHeading>
-	{
-		activity ? (
-			<div class="card">
-				<div class="contributions-hero">
-					<p class="hero-value">
-						{activity.profile.totalContributions ?? '—'}
-					</p>
-					<p class="hero-label">
-						Total Contributions
-						{activity.profile.totalContributions === null && (
-							<span class="hero-note">(近日対応)</span>
-						)}
-					</p>
-				</div>
-
-				<div class="stats-grid">
-					<div class="stat">
-						<p class="value">{activity.profile.followers}</p>
-						<p class="label">Followers</p>
-					</div>
-					<div class="stat">
-						<p class="value">{activity.profile.publicRepos}</p>
-						<p class="label">Public Repos</p>
-					</div>
-					<div class="stat">
-						<p class="value">{activity.profile.totalStars}</p>
-						<p class="label">Total Stars</p>
-					</div>
-				</div>
-
-				{allLanguages.length > 0 && (
-					<div class="languages">
-						<div class="lang-bar">
-							{allLanguages.map((lang) => (
-								<span style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }} />
-							))}
-						</div>
-						<ul class="lang-list scrollbox">
-							{allLanguages.map((lang) => (
-								<li>
-									<span class="dot" style={{ backgroundColor: lang.color }} />
-									<span class="lang-name">{lang.name}</span>
-									<span class="lang-percentage">{lang.percentage.toFixed(2)}%</span>
-								</li>
-							))}
-						</ul>
-					</div>
-				)}
-
-				{activity.commitActivity.length > 0 && (
-					<div class="commit-activity">
-						<div class="bars">
-							{activity.commitActivity.map((day) => (
-								<span
-									class="bar"
-									title={`${day.date}: ${day.count} commits`}
-									style={{ height: `${Math.max((day.count / maxCommitCount) * 100, 4)}%` }}
-								/>
-							))}
-						</div>
-						<p class="range-label">直近{activity.commitActivity.length}日間のコミット数</p>
-					</div>
-				)}
+	{activity ? (
+		<div class="card">
+			<div class="contributions-hero">
+				<p class="hero-value">{activity.profile.totalContributions ?? '—'}</p>
+				<p class="hero-label">
+					Total Contributions
+					{activity.profile.totalContributions === null && <span class="hero-note">(近日対応)</span>}
+				</p>
 			</div>
-		) : (
-			<p class="empty">
-				GitHubのアクティビティを取得できませんでした。
-				<a href={profileUrl} target="_blank" rel="noopener noreferrer">
-					GitHub
-				</a>
-				から確認してください。
-			</p>
-		)
-	}
+
+			<div class="stats-grid">
+				<div class="stat">
+					<p class="value">{activity.profile.followers}</p>
+					<p class="label">Followers</p>
+				</div>
+				<div class="stat">
+					<p class="value">{activity.profile.publicRepos}</p>
+					<p class="label">Public Repos</p>
+				</div>
+				<div class="stat">
+					<p class="value">{activity.profile.totalStars}</p>
+					<p class="label">Total Stars</p>
+				</div>
+			</div>
+
+			{allLanguages.length > 0 && (
+				<div class="languages">
+					<div class="lang-bar">
+						{allLanguages.map((lang) => (
+							<span style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }} />
+						))}
+					</div>
+					<ul class="lang-list scrollbox">
+						{allLanguages.map((lang) => (
+							<li>
+								<span class="dot" style={{ backgroundColor: lang.color }} />
+								<span class="lang-name">{lang.name}</span>
+								<span class="lang-percentage">{lang.percentage.toFixed(2)}%</span>
+							</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{activity.commitActivity.length > 0 && (
+				<div class="commit-activity">
+					<div class="bars">
+						{activity.commitActivity.map((day) => (
+							<span
+								class="bar"
+								title={`${day.date}: ${day.count} commits`}
+								style={{ height: `${Math.max((day.count / maxCommitCount) * 100, 4)}%` }}
+							/>
+						))}
+					</div>
+					<p class="range-label">直近{activity.commitActivity.length}日間のコミット数</p>
+				</div>
+			)}
+		</div>
+	) : (
+		<p class="empty">
+			GitHubのアクティビティを取得できませんでした。
+			<a href={profileUrl} target="_blank" rel="noopener noreferrer">
+				GitHub
+			</a>
+			から確認してください。
+		</p>
+	)}
 </section>
 
 <style>

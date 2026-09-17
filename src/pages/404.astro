@@ -1,41 +1,19 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Button from '../components/parts/Button.astro';
+import ErrorHero from '../components/ui/ErrorHero.astro';
+
+Astro.response.status = 404;
+Astro.response.statusText = 'Not Found';
 ---
 
-<BaseLayout title="404 Not Found | まろん｡のポートフォリオ">
-	<div class="not-found">
-		<p class="code">404</p>
-		<p class="message">お探しのページは見つかりませんでした。</p>
-		<Button href="/" variant="primary">トップページへ戻る</Button>
-	</div>
+<BaseLayout
+	title="404 - Page Not Found | まろん｡のポートフォリオ"
+	description="お探しのページが見つかりませんでした"
+>
+	<ErrorHero
+		code="404"
+		title="Page Not Found"
+		description="お探しのページが見つかりませんでした。"
+		variant="notfound"
+	/>
 </BaseLayout>
-
-<style>
-	.not-found {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		gap: 16px;
-		min-height: 60vh;
-		padding: 48px 20px;
-		text-align: center;
-	}
-
-	.code {
-		margin: 0;
-		font-size: 64px;
-		font-weight: 700;
-		background: var(--color-accent-gradient);
-		background-clip: text;
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-	}
-
-	.message {
-		margin: 0 0 8px;
-		color: var(--color-text-light);
-		font-size: 15px;
-	}
-</style>

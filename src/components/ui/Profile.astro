@@ -36,15 +36,7 @@ interface Props {
 	quote?: string[];
 }
 
-const {
-	name,
-	description,
-	iconSrc,
-	meta = [],
-	linkSections = [],
-	badgeSections = [],
-	quote,
-} = Astro.props;
+const { name, description, iconSrc, meta = [], linkSections = [], badgeSections = [], quote } = Astro.props;
 ---
 
 <div class="profile">
@@ -53,54 +45,46 @@ const {
 		<h1 class="name">{name}</h1>
 		<p class="description">{description}</p>
 
-		{
-			meta.length > 0 && (
-				<div class="meta">
-					{meta.map((item) => (
-						<Badge icon={item.icon}>{item.label}</Badge>
-					))}
-				</div>
-			)
-		}
+		{meta.length > 0 && (
+			<div class="meta">
+				{meta.map((item) => (
+					<Badge icon={item.icon}>{item.label}</Badge>
+				))}
+			</div>
+		)}
 	</div>
 
-	{
-		quote && quote.length > 0 && (
-			<div class="section">
-				<Quote lines={quote} />
-			</div>
-		)
-	}
+	{quote && quote.length > 0 && (
+		<div class="section">
+			<Quote lines={quote} />
+		</div>
+	)}
 
-	{
-		badgeSections.map((section) => (
-			<div class="section">
-				<div class="sub-head">
-					<h3>{section.heading}</h3>
-				</div>
-				<div class="badge-list">
-					{section.items.map((item) => (
-						<Badge>{item}</Badge>
-					))}
-				</div>
+	{badgeSections.map((section) => (
+		<div class="section">
+			<div class="sub-head">
+				<h3>{section.heading}</h3>
 			</div>
-		))
-	}
+			<div class="badge-list">
+				{section.items.map((item) => (
+					<Badge>{item}</Badge>
+				))}
+			</div>
+		</div>
+	))}
 
-	{
-		linkSections.map((section) => (
-			<div class="section">
-				<div class="sub-head">
-					<h3>{section.heading}</h3>
-				</div>
-				<div class="section-links">
-					{section.links.map((link) => (
-						<LinkCard title={link.title} url={link.url} iconSlug={link.iconSlug} iconSrc={link.iconSrc} />
-					))}
-				</div>
+	{linkSections.map((section) => (
+		<div class="section">
+			<div class="sub-head">
+				<h3>{section.heading}</h3>
 			</div>
-		))
-	}
+			<div class="section-links">
+				{section.links.map((link) => (
+					<LinkCard title={link.title} url={link.url} iconSlug={link.iconSlug} iconSrc={link.iconSrc} />
+				))}
+			</div>
+		</div>
+	))}
 </div>
 
 <style>

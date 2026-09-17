@@ -31,28 +31,26 @@ const categoryLabel: Record<CareerItem['category'], string> = {
 <section class="career-section">
 	<SectionHeading>Career</SectionHeading>
 	<ol class="timeline scrollbox">
-		{
-			items.map((item) => (
-				<li class="item">
-					<span class="dot" style={{ backgroundColor: categoryColor[item.category] }} />
-					<div class="body">
-						<p class="date">
-							{item.year}/{String(item.month).padStart(2, '0')}
-							<span class="category" style={{ color: categoryColor[item.category] }}>
-								{categoryLabel[item.category]}
-							</span>
-						</p>
-						{item.url ? (
-							<a class="text" href={item.url} target="_blank" rel="noopener noreferrer">
-								{item.text}
-							</a>
-						) : (
-							<p class="text">{item.text}</p>
-						)}
-					</div>
-				</li>
-			))
-		}
+		{items.map((item) => (
+			<li class="item">
+				<span class="dot" style={{ backgroundColor: categoryColor[item.category] }} />
+				<div class="body">
+					<p class="date">
+						{item.year}/{String(item.month).padStart(2, '0')}
+						<span class="category" style={{ color: categoryColor[item.category] }}>
+							{categoryLabel[item.category]}
+						</span>
+					</p>
+					{item.url ? (
+						<a class="text" href={item.url} target="_blank" rel="noopener noreferrer">
+							{item.text}
+						</a>
+					) : (
+						<p class="text">{item.text}</p>
+					)}
+				</div>
+			</li>
+		))}
 	</ol>
 </section>
 
