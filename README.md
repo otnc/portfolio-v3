@@ -18,8 +18,7 @@
 
 ```sh
 pnpm install
-cd server && cp .env.example .env && $EDITOR .env   # GITHUB_TOKEN などを設定
-cd ..
+cp .env.example .env && $EDITOR .env   # GITHUB_TOKEN などを設定
 ```
 
 ## コマンド

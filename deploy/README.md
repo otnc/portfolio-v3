@@ -29,10 +29,10 @@ pnpm install
 # 3. Astro サイトをビルド
 pnpm run build            # dist/ が生成される
 
-# 4. サーバーの .env を用意してビルド
-cd server
+# 4. .env を用意してサーバーをビルド (.env はリポジトリ直下に置く)
 cp .env.example .env
-$EDITOR .env             # GITHUB_TOKEN、他プロセスと衝突しなければ PORT はそのままでよい
+$EDITOR .env              # GITHUB_TOKEN、他プロセスと衝突しなければ PORT はそのままでよい
+cd server
 pnpm run build            # dist/index.js が生成される
 cd ..
 
