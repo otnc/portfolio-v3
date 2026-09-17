@@ -41,6 +41,7 @@ cd ..
 
 # 5. Anubis をインストール (公式 apt リポジトリ, 詳細は
 #    https://anubis.techaro.lol/docs/admin/installation/)
+sudo cp deploy/anubis-policy.yaml /etc/anubis/marron-portfolio-policy.yaml
 sudo cp deploy/anubis.env /etc/anubis/marron-portfolio.env
 $EDITOR /etc/anubis/marron-portfolio.env   # COOKIE_DOMAIN、TARGET のポート等を実環境に
 sudo systemctl enable --now anubis@marron-portfolio
@@ -104,3 +105,4 @@ Astro は `server/`自身のURL (`http://127.0.0.1:<PORT>/api/github/otnc` な�
   - favicon (`server/cache/favicon/`): 7日間キャッシュ。
   - 手動でキャッシュを消したい場合は該当ディレクトリを `rm -rf` してサービスを再起動すればよい。
 - **ピン留めリポジトリの取得**: GitHubには公式APIが無いため、プロフィールページのHTMLを解析して取得するのを基本とし、解析に失敗した場合のみ非公式API (pinned.berrysauce.dev) にフォールバックする。
+- **AnubisのOpen Graph passthrough (`deploy/anubis-policy.yaml`)**: 既定のボットポリシーのままだと、Discord/Twitter/Slack等のリンクプレビュー用ボットもUser-Agentに`Mozilla`を含むため一般ブラウザ扱いされてPoWチャレンジを出されてしまい、解けないのでOGPが一切表示されない。`openGraph.enabled: true` を有効にすると、チャレンジ対象のリクエストにもバックエンドから取得したOGPタグだけを含む軽量なHTMLが返るようになり、チャレンジを解けないボットでも正しいOGPプレビューを取得できる(通常ブラウザは従来通りチャレンジされ、挙動が変わるのはOGP取得時のみ)。
