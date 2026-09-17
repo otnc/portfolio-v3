@@ -1,5 +1,8 @@
+import { ofetch } from 'ofetch';
+
 // server/ (Hono, github-most-used-langs 互換 + 全期間コントリビュート対応) のAPIを常に使う。
-const API_URL = 'http://127.0.0.1:3000/api/github/otnc';
+// ポートは server/.env.example の PORT と一致させること。
+const API_URL = 'http://127.0.0.1:3010/api/github/otnc';
 
 export interface GithubProfileStats {
 	login: string;
@@ -30,10 +33,7 @@ export interface GithubActivity {
 
 export async function fetchGithubActivity(): Promise<GithubActivity | null> {
 	try {
-		const response = await fetch(API_URL, { cache: 'no-store' });
-		if (!response.ok) return null;
-
-		const data = await response.json();
+		const data = await ofetch<Record<string, any>>(API_URL);
 		if (!data?.profile) return null;
 
 		return {

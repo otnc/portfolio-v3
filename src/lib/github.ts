@@ -1,3 +1,6 @@
+import * as cheerio from 'cheerio';
+import { ofetch } from 'ofetch';
+import { getOrFetch } from './buildCache';
 import { getLanguageColor } from './languageColors';
 
 const SEARCH_REPOS_URL = 'https://api.github.com/search/repositories';
@@ -52,6 +55,36 @@ interface SearchRepoItem {
 	language?: unknown;
 }
 
+async function fetchAllRepos(user: string): Promise<Repo[]> {
+	try {
+		return await getOrFetch(`repos-${user}`, async () => {
+			const data = await ofetch<{ items?: SearchRepoItem[] }>(SEARCH_REPOS_URL, {
+				query: { q: `user:${user}`, sort: 'stars', order: 'desc', per_page: 100 },
+				headers: githubHeaders(),
+			});
+			const items = Array.isArray(data.items) ? data.items : [];
+
+			return Promise.all(
+				items.map(async (item) => {
+					const language = typeof item.language === 'string' ? item.language : undefined;
+					return {
+						name: String(item.name ?? ''),
+						owner: String(item.owner?.login ?? user),
+						url: String(item.html_url ?? ''),
+						description: String(item.description ?? ''),
+						stars: Number(item.stargazers_count ?? 0),
+						topLanguage: language
+							? { name: language, color: await getLanguageColor(language) }
+							: undefined,
+					};
+				}),
+			);
+		});
+	} catch {
+		return [];
+	}
+}
+
 interface PinnedItem {
 	author?: unknown;
 	name?: unknown;
@@ -61,47 +94,79 @@ interface PinnedItem {
 	languageColor?: unknown;
 }
 
-async function fetchAllRepos(user: string): Promise<Repo[]> {
-	try {
-		const url = `${SEARCH_REPOS_URL}?q=user:${user}&sort=stars&order=desc&per_page=100`;
-		const response = await fetch(url, { headers: githubHeaders() });
-		if (!response.ok) return [];
+// GitHub には固定(ピン留め)リポジトリを取得する公式APIがないため、プロフィールページのHTMLを解析して取得する。
+// それも失敗した場合のみ、非公式API (pinned.berrysauce.dev) にフォールバックする。
+async function scrapePinnedRepos(user: string): Promise<Repo[]> {
+	const html = await ofetch<string>(`https://github.com/${user}`, { responseType: 'text' });
+	const $ = cheerio.load(html);
 
-		const data = await response.json();
-		const items: SearchRepoItem[] = Array.isArray(data?.items) ? data.items : [];
+	const repos = $('.js-pinned-item-list-item')
+		.map((_, el) => {
+			const $item = $(el);
+			const link = $item.find('a[data-hydro-click]').first();
+			const href = link.attr('href') ?? '';
+			const [owner, name] = href.replace(/^\//, '').split('/');
+			if (!owner || !name) return null;
 
-		return items.map((item) => {
-			const language = typeof item.language === 'string' ? item.language : undefined;
-			return {
-				name: String(item.name ?? ''),
-				owner: String(item.owner?.login ?? user),
-				url: String(item.html_url ?? ''),
-				description: String(item.description ?? ''),
-				stars: Number(item.stargazers_count ?? 0),
-				topLanguage: language ? { name: language, color: getLanguageColor(language) } : undefined,
+			const languageName = $item.find('[itemprop="programmingLanguage"]').first().text().trim();
+			const languageColor = $item
+				.find('.repo-language-color')
+				.first()
+				.attr('style')
+				?.match(/background-color:\s*(#[0-9a-fA-F]{3,6})/)?.[1];
+			const starsText = $item
+				.find('a[href$="/stargazers"]')
+				.first()
+				.text()
+				.replace(/[^\d.km]/gi, '');
+			const stars = parseCompactNumber(starsText);
+
+			const repo: Repo = {
+				name,
+				owner,
+				url: `https://github.com/${owner}/${name}`,
+				description: $item.find('.pinned-item-desc').first().text().trim(),
+				stars: stars ?? 0,
+				pinned: true,
+				topLanguage: languageName ? { name: languageName, color: languageColor ?? '' } : undefined,
 			};
-		});
-	} catch {
-		return [];
-	}
+			return repo;
+		})
+		.get()
+		.filter((repo): repo is Repo => repo !== null);
+
+	// 言語色がHTML中に見つからなかった分だけ、Linguistの色一覧で補う。
+	return Promise.all(
+		repos.map(async (repo) => {
+			if (repo.topLanguage && !repo.topLanguage.color) {
+				repo.topLanguage.color = await getLanguageColor(repo.topLanguage.name);
+			}
+			return repo;
+		}),
+	);
 }
 
-// GitHub には固定(ピン留め)リポジトリを取得する公式APIがないため、非公式API (pinned.berrysauce.dev) から owner/repo 単位で取得する。
-// 自分がオーナーでないリポジトリ(fork/所属先など)が固定されている場合もあるため、author を保持して正しいリポジトリを指す。
-async function fetchPinnedRepos(user: string): Promise<Repo[]> {
-	try {
-		const response = await fetch(`${PINNED_API_URL}/${user}`);
-		if (!response.ok) return [];
+function parseCompactNumber(text: string): number | null {
+	const match = text.trim().match(/^([\d.]+)(k|m)?$/i);
+	if (!match) return null;
+	const value = Number(match[1]);
+	if (Number.isNaN(value)) return null;
+	const unit = match[2]?.toLowerCase();
+	if (unit === 'k') return Math.round(value * 1_000);
+	if (unit === 'm') return Math.round(value * 1_000_000);
+	return Math.round(value);
+}
 
-		const data = await response.json();
-		const items: PinnedItem[] = Array.isArray(data) ? data : [];
+async function fetchPinnedFromApi(user: string): Promise<Repo[]> {
+	const items = await ofetch<PinnedItem[]>(`${PINNED_API_URL}/${user}`);
+	if (!Array.isArray(items)) return [];
 
-		return items.map((item) => {
+	return Promise.all(
+		items.map(async (item) => {
 			const owner = String(item.author ?? user);
 			const name = String(item.name ?? '');
 			const language = typeof item.language === 'string' ? item.language : undefined;
-			const languageColor =
-				typeof item.languageColor === 'string' ? item.languageColor : undefined;
+			const languageColor = typeof item.languageColor === 'string' ? item.languageColor : undefined;
 
 			return {
 				name,
@@ -111,36 +176,50 @@ async function fetchPinnedRepos(user: string): Promise<Repo[]> {
 				stars: Number(item.stars ?? 0),
 				pinned: true,
 				topLanguage: language
-					? { name: language, color: languageColor ?? getLanguageColor(language) }
+					? { name: language, color: languageColor ?? (await getLanguageColor(language)) }
 					: undefined,
 			};
-		});
-	} catch {
-		return [];
-	}
+		}),
+	);
+}
+
+async function fetchPinnedRepos(user: string): Promise<Repo[]> {
+	return getOrFetch(`pinned-${user}`, async () => {
+		try {
+			const scraped = await scrapePinnedRepos(user);
+			if (scraped.length > 0) return scraped;
+		} catch {
+			// HTML構造の変化などで解析に失敗した場合は下のフォールバックに委ねる。
+		}
+
+		try {
+			return await fetchPinnedFromApi(user);
+		} catch {
+			return [];
+		}
+	});
 }
 
 // 可能な場合は言語ごとのバイト数から使用割合を計算する。
 // レート制限等で取れない場合は null を返し、呼び出し側は検索結果に含まれる最多言語(topLanguage)だけの表示にフォールバックする。
 async function fetchLanguageBreakdown(owner: string, name: string): Promise<LanguageStat[] | null> {
 	try {
-		// 言語ごとのバイト内訳は ungh.cc に無いため、ここだけは GitHub 本家を叩く。
-		const response = await fetch(`https://api.github.com/repos/${owner}/${name}/languages`, {
-			headers: githubHeaders(),
+		return await getOrFetch(`langs-${owner}-${name}`, async () => {
+			const data = await ofetch<Record<string, number>>(
+				`https://api.github.com/repos/${owner}/${name}/languages`,
+				{ headers: githubHeaders() },
+			);
+			const total = Object.values(data).reduce((sum, bytes) => sum + bytes, 0);
+			if (total <= 0) throw new Error('no languages');
+
+			return Promise.all(
+				Object.entries(data).map(async ([langName, bytes]) => ({
+					name: langName,
+					percentage: (bytes / total) * 100,
+					color: await getLanguageColor(langName),
+				})),
+			).then((stats) => stats.sort((a, b) => b.percentage - a.percentage));
 		});
-		if (!response.ok) return null;
-
-		const data: Record<string, number> = await response.json();
-		const total = Object.values(data).reduce((sum, bytes) => sum + bytes, 0);
-		if (total <= 0) return null;
-
-		return Object.entries(data)
-			.map(([langName, bytes]) => ({
-				name: langName,
-				percentage: (bytes / total) * 100,
-				color: getLanguageColor(langName),
-			}))
-			.sort((a, b) => b.percentage - a.percentage);
 	} catch {
 		return null;
 	}
@@ -168,43 +247,55 @@ interface SearchIssueItem {
 	repository_url?: unknown;
 }
 
-// GitHub 本家はレート制限が厳しいので、単純なスター数取得はキャッシュ済みの ungh.cc 経由にして制限を回避する。
+// スター数は公式APIを優先し、レート制限などで取れなかった場合のみ ungh.cc にフォールバックする。
 // それでも取得できないことはあるため、失敗時は 0 と偽らず null を返す(呼び出し側で「不明」として扱い、表示や並び順から除外する)。
 async function fetchRepoStars(owner: string, name: string): Promise<number | null> {
-	try {
-		const response = await fetch(`${UNGH_API_URL}/repos/${owner}/${name}`);
-		if (!response.ok) return null;
+	return getOrFetch(`stars-${owner}-${name}`, async () => {
+		try {
+			const data = await ofetch<{ stargazers_count?: unknown }>(
+				`https://api.github.com/repos/${owner}/${name}`,
+				{ headers: githubHeaders() },
+			);
+			if (typeof data.stargazers_count === 'number') return data.stargazers_count;
+		} catch {
+			// 公式APIがレート制限等で失敗した場合はフォールバックへ。
+		}
 
-		const data = await response.json();
-		const stars = data?.repo?.stars;
-		return typeof stars === 'number' ? stars : null;
-	} catch {
-		return null;
-	}
+		try {
+			const data = await ofetch<{ repo?: { stars?: unknown } }>(
+				`${UNGH_API_URL}/repos/${owner}/${name}`,
+			);
+			return typeof data.repo?.stars === 'number' ? data.repo.stars : null;
+		} catch {
+			return null;
+		}
+	});
 }
 
 // フォークして送った Pull Request が、外部(自分以外が所有する)リポジトリでマージされたものを集計する。GitHub に専用APIは無いため、Issues/PR検索の `is:merged` + 自分のリポジトリを除外する条件で代用する。
 // 規模(スター数)が大きいプロジェクト順に並べたいので、集計後にそれぞれのリポジトリのスター数を取得してソートし直す。
 export async function fetchMergedContributions(user: string): Promise<Contribution[]> {
 	try {
-		const query = `type:pr+author:${user}+is:merged+-user:${user}`;
-		const url = `${SEARCH_ISSUES_URL}?q=${query}&per_page=100`;
-		const response = await fetch(url, { headers: githubHeaders() });
-		if (!response.ok) return [];
+		const counts = await getOrFetch(`contributions-${user}`, async () => {
+			const query = `type:pr+author:${user}+is:merged+-user:${user}`;
+			const data = await ofetch<{ items?: SearchIssueItem[] }>(SEARCH_ISSUES_URL, {
+				query: { q: query, per_page: 100 },
+				headers: githubHeaders(),
+			});
+			const items = Array.isArray(data.items) ? data.items : [];
 
-		const data = await response.json();
-		const items: SearchIssueItem[] = Array.isArray(data?.items) ? data.items : [];
-
-		const counts = new Map<string, number>();
-		for (const item of items) {
-			const match = String(item.repository_url ?? '').match(/repos\/([^/]+)\/([^/]+)$/);
-			if (!match) continue;
-			const repo = `${match[1]}/${match[2]}`;
-			counts.set(repo, (counts.get(repo) ?? 0) + 1);
-		}
+			const grouped = new Map<string, number>();
+			for (const item of items) {
+				const match = String(item.repository_url ?? '').match(/repos\/([^/]+)\/([^/]+)$/);
+				if (!match) continue;
+				const repo = `${match[1]}/${match[2]}`;
+				grouped.set(repo, (grouped.get(repo) ?? 0) + 1);
+			}
+			return [...grouped.entries()];
+		});
 
 		const contributions = await Promise.all(
-			[...counts.entries()].map(async ([repo, mergedCount]) => {
+			counts.map(async ([repo, mergedCount]) => {
 				const [owner, name] = repo.split('/');
 				const stars = await fetchRepoStars(owner, name);
 				return { repo, owner, name, url: `https://github.com/${repo}`, mergedCount, stars };

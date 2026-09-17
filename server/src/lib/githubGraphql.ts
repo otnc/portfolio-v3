@@ -1,3 +1,4 @@
+import { ofetch } from 'ofetch';
 import { env } from './env.js';
 import { getLanguageColor } from './languageColors.js';
 import type { CommitActivityDay, LanguageStat, ProfileStats } from '../types.js';
@@ -5,20 +6,12 @@ import type { CommitActivityDay, LanguageStat, ProfileStats } from '../types.js'
 const GRAPHQL_URL = 'https://api.github.com/graphql';
 
 async function graphql<T>(query: string, variables: Record<string, unknown>): Promise<T> {
-	const response = await fetch(GRAPHQL_URL, {
+	const json = await ofetch<{ data?: T; errors?: { message: string }[] }>(GRAPHQL_URL, {
 		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${env.githubToken}`,
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ query, variables }),
+		headers: { Authorization: `Bearer ${env.githubToken}` },
+		body: { query, variables },
 	});
 
-	if (!response.ok) {
-		throw new Error(`GitHub GraphQL API error ${response.status}: ${await response.text()}`);
-	}
-
-	const json = (await response.json()) as { data?: T; errors?: { message: string }[] };
 	if (json.errors?.length) {
 		throw new Error(`GitHub GraphQL API returned errors: ${json.errors.map((e) => e.message).join('; ')}`);
 	}
@@ -110,7 +103,7 @@ export async function fetchProfileAndLanguages(login: string): Promise<{
 			for (const edge of repo.languages.edges) {
 				const key = edge.node.name;
 				const prev = languageBytes.get(key);
-				const color = edge.node.color ?? getLanguageColor(key);
+				const color = edge.node.color ?? (await getLanguageColor(key));
 				languageBytes.set(key, { bytes: (prev?.bytes ?? 0) + edge.size, color });
 			}
 		}
