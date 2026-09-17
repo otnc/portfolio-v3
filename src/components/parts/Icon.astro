@@ -10,7 +10,22 @@ const { src, alt = '', size = '100%', initial = '?' } = Astro.props;
 ---
 
 {src ? (
-	<img class="icon" src={src} alt={alt} style={{ width: size, height: size }} />
+	<Fragment>
+		<img
+			class="icon"
+			src={src}
+			alt={alt}
+			style={{ width: size, height: size }}
+			onerror="this.style.display='none';this.nextElementSibling.style.removeProperty('display')"
+		/>
+		<div
+			class="icon icon-fallback"
+			style={{ width: size, height: size, display: 'none' }}
+			aria-hidden={alt === ''}
+		>
+			{initial}
+		</div>
+	</Fragment>
 ) : (
 	<div class="icon icon-fallback" style={{ width: size, height: size }} aria-hidden={alt === ''}>
 		{initial}
