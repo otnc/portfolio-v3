@@ -1,8 +1,7 @@
 import { ofetch } from 'ofetch';
 
 // GitHub関連のデータ取得は全て server/ (Hono API) を経由する。
-// Astro/ブラウザ側から外部サイトを直接叩かないことで、任意の外部ホストへの
-// リクエストや取得結果の扱いを1箇所(サーバー側)に集約する。
+// Astro/ブラウザ側から外部サイトを直接叩かないことで、任意の外部ホストへのリクエストや取得結果の扱いを1箇所(サーバー側)に集約する。
 const BASE_URL = 'http://127.0.0.1:3010/api';
 
 export interface LanguageStat {

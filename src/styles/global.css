@@ -43,6 +43,24 @@ img {
 	overflow-y: auto;
 	scrollbar-width: thin;
 	scrollbar-color: var(--color-border) transparent;
+
+	/* まだ続きがある方向にだけ影を出し、スクロールできることが一目で分かるようにする。
+	   JS不要のCSSトリック: 背景色で覆う層(local)がスクロールに追従して影(scroll)を隠す/出す。 */
+	--scrollbox-fade-color: var(--color-surface);
+	--scrollbox-fade-size: 28px;
+	background-repeat: no-repeat;
+	background-position: top, bottom, top, bottom;
+	background-size:
+		100% var(--scrollbox-fade-size),
+		100% var(--scrollbox-fade-size),
+		100% 14px,
+		100% 14px;
+	background-attachment: local, local, scroll, scroll;
+	background-image:
+		linear-gradient(var(--scrollbox-fade-color) 30%, transparent),
+		linear-gradient(transparent, var(--scrollbox-fade-color) 70%),
+		radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.14), transparent),
+		radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.14), transparent);
 }
 
 .scrollbox::-webkit-scrollbar {
