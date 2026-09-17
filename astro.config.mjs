@@ -4,6 +4,7 @@ import subsetFont from './integrations/subset-font.mjs';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://montblank.fun',
 	integrations: [
 		subsetFont({
 			sourceFont: new URL('./src/fonts/AkazukinPOP.otf', import.meta.url),
