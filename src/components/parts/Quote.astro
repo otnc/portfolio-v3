@@ -1,0 +1,33 @@
+---
+interface Props {
+	lines: string[];
+}
+
+const { lines } = Astro.props;
+---
+
+<blockquote class="quote">
+	{lines.map((line) => <p>{line}</p>)}
+</blockquote>
+
+<style>
+	.quote {
+		margin: 0;
+		padding: 14px 18px;
+		border-left: 3px solid transparent;
+		border-image: var(--color-accent-gradient) 1;
+		background-color: var(--color-surface-alt);
+		border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+	}
+
+	.quote p {
+		margin: 0;
+		font-size: 15px;
+		font-style: italic;
+		color: var(--color-text-light);
+	}
+
+	.quote p + p {
+		margin-top: 6px;
+	}
+</style>

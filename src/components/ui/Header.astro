@@ -1,0 +1,87 @@
+---
+import Button from '../parts/Button.astro';
+
+const navLinks = [{ href: '/about', label: 'About' }];
+---
+
+<header class="header">
+	<div class="header-inner">
+		<div class="header-contents">
+			<a href="/" class="brand">
+				<img src="/logo.png" alt="まろん｡" class="brand-logo" />
+			</a>
+			<nav class="nav-group">
+				{
+					navLinks.map((link) => (
+						<Button href={link.href} variant="nav">
+							{link.label}
+						</Button>
+					))
+				}
+			</nav>
+		</div>
+	</div>
+</header>
+
+<script>
+	function updateHeaderHeight() {
+		const header = document.querySelector('.header');
+		if (header instanceof HTMLElement) {
+			document.documentElement.style.setProperty('--header-height', `${header.offsetHeight}px`);
+		}
+	}
+
+	updateHeaderHeight();
+	window.addEventListener('resize', updateHeaderHeight);
+</script>
+
+<style>
+	.header {
+		position: sticky;
+		top: 0;
+		z-index: 50;
+		padding-bottom: 10px;
+		background-color: var(--color-sec-background);
+	}
+
+	.header-inner {
+		width: 85%;
+		margin: 0 auto;
+		overflow: hidden;
+		border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.header-contents {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 10px;
+		margin: 16px 20px;
+	}
+
+	.nav-group {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+	}
+
+	.brand {
+		display: flex;
+		align-items: center;
+	}
+
+	.brand-logo {
+		height: 44px;
+		width: auto;
+	}
+
+	@media screen and (width <= 950px) {
+		.header-inner {
+			width: 100%;
+			border-radius: 0 0 var(--radius-md) var(--radius-md);
+		}
+	}
+</style>

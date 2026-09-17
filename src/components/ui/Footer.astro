@@ -1,0 +1,37 @@
+---
+interface Props {
+	repoUrl?: string;
+}
+
+const { repoUrl = 'https://github.com/otnc' } = Astro.props;
+---
+
+<footer class="footer">
+	<div class="footer-contents">
+		<p>2022 - 2026</p>
+		<a href={repoUrl} target="_blank" rel="noopener noreferrer">&copy; まろん｡ - All rights reserved.</a>
+	</div>
+</footer>
+
+<style>
+	.footer {
+		background-color: var(--color-text);
+	}
+
+	.footer-contents {
+		margin: 12px 0;
+		padding: 8px 0;
+		text-align: center;
+		color: var(--color-surface);
+		font-size: 14px;
+	}
+
+	.footer-contents p {
+		margin: 0 0 4px;
+		opacity: 0.7;
+	}
+
+	.footer-contents a:hover {
+		text-decoration: underline;
+	}
+</style>

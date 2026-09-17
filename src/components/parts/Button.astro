@@ -1,0 +1,63 @@
+---
+interface Props {
+	href: string;
+	variant?: 'nav' | 'primary' | 'ghost';
+	external?: boolean;
+}
+
+const { href, variant = 'nav', external = false } = Astro.props;
+---
+
+<a
+	class={`button button-${variant}`}
+	href={href}
+	target={external ? '_blank' : undefined}
+	rel={external ? 'noopener noreferrer' : undefined}
+>
+	<slot />
+</a>
+
+<style>
+	.button {
+		display: inline-block;
+		font-size: 15px;
+		font-weight: 600;
+		transition:
+			background-color 0.15s,
+			opacity 0.15s,
+			box-shadow 0.15s,
+			transform 0.15s;
+	}
+
+	.button-nav {
+		padding: 4px 2px;
+		color: var(--color-text);
+	}
+
+	.button-nav:hover {
+		opacity: 0.7;
+	}
+
+	.button-primary {
+		padding: 11px 24px;
+		border-radius: 999px;
+		color: var(--color-surface);
+		background: var(--color-accent-gradient);
+	}
+
+	.button-primary:hover {
+		box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+		transform: translateY(-1px);
+	}
+
+	.button-ghost {
+		padding: 11px 24px;
+		border-radius: 999px;
+		color: var(--color-text);
+		background-color: var(--color-surface-alt);
+	}
+
+	.button-ghost:hover {
+		background-color: var(--color-border);
+	}
+</style>

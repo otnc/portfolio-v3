@@ -1,0 +1,125 @@
+---
+import type { LanguageStat } from '../../lib/github';
+
+interface Props {
+	title: string;
+	url: string;
+	description?: string;
+	stars?: number;
+	pinned?: boolean;
+	languages?: LanguageStat[];
+	topLanguage?: { name: string; color: string };
+}
+
+const { title, url, description, stars, pinned, languages, topLanguage } = Astro.props;
+
+const primaryLanguage = languages?.[0] ?? (topLanguage ? { ...topLanguage, percentage: undefined } : undefined);
+---
+
+<a class="work-card" href={url} target="_blank" rel="noopener noreferrer">
+	<div class="text">
+		<p class="title">
+			{pinned && (
+				<span class="pin" title="Pinned" aria-label="Pinned">
+					📌
+				</span>
+			)}
+			{title}
+		</p>
+		{description && <p class="description">{description}</p>}
+		{
+			primaryLanguage && (
+				<span class="lang-label">
+					<span class="dot" style={{ backgroundColor: primaryLanguage.color }} />
+					{primaryLanguage.name}
+					{typeof primaryLanguage.percentage === 'number' && (
+						<span class="percentage">{primaryLanguage.percentage.toFixed(0)}%</span>
+					)}
+				</span>
+			)
+		}
+	</div>
+	{
+		typeof stars === 'number' && (
+			<span class="stars">
+				<span aria-hidden="true">★</span>
+				{stars}
+			</span>
+		)
+	}
+</a>
+
+<style>
+	.work-card {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 14px;
+		padding: 20px 22px;
+		transition: background-color 0.15s;
+	}
+
+	.work-card:hover {
+		background-color: var(--color-surface-alt);
+	}
+
+	.text {
+		min-width: 0;
+	}
+
+	.title {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.pin {
+		font-size: 13px;
+		margin-right: 2px;
+	}
+
+	.description {
+		margin: 4px 0 0;
+		color: var(--color-text-light);
+		font-size: 13px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.lang-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		margin-top: 6px;
+		font-size: 11px;
+		color: var(--color-text-light);
+	}
+
+	.dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 100%;
+		flex-shrink: 0;
+	}
+
+	.percentage {
+		color: var(--color-text-muted);
+	}
+
+	.stars {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		color: var(--color-text-light);
+		font-size: 14px;
+		white-space: nowrap;
+	}
+
+	.stars span[aria-hidden] {
+		color: #f59e0b;
+	}
+</style>

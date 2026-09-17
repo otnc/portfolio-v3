@@ -1,0 +1,121 @@
+---
+import SectionHeading from '../parts/SectionHeading.astro';
+
+export interface CareerItem {
+	year: number;
+	month: number;
+	text: string;
+	url?: string;
+	category: 'work' | 'award' | 'project';
+}
+
+interface Props {
+	items: CareerItem[];
+}
+
+const { items } = Astro.props;
+
+const categoryColor: Record<CareerItem['category'], string> = {
+	work: 'var(--color-accent-start)',
+	award: '#f59e0b',
+	project: '#10b981',
+};
+
+const categoryLabel: Record<CareerItem['category'], string> = {
+	work: '学歴・職歴',
+	award: '受賞',
+	project: '開発',
+};
+---
+
+<section class="career-section">
+	<SectionHeading>Career</SectionHeading>
+	<ol class="timeline scrollbox">
+		{
+			items.map((item) => (
+				<li class="item">
+					<span class="dot" style={{ backgroundColor: categoryColor[item.category] }} />
+					<div class="body">
+						<p class="date">
+							{item.year}/{String(item.month).padStart(2, '0')}
+							<span class="category" style={{ color: categoryColor[item.category] }}>
+								{categoryLabel[item.category]}
+							</span>
+						</p>
+						{item.url ? (
+							<a class="text" href={item.url} target="_blank" rel="noopener noreferrer">
+								{item.text}
+							</a>
+						) : (
+							<p class="text">{item.text}</p>
+						)}
+					</div>
+				</li>
+			))
+		}
+	</ol>
+</section>
+
+<style>
+	.timeline {
+		max-height: 530px;
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.item {
+		display: grid;
+		grid-template-columns: 16px minmax(0, 1fr);
+		gap: 16px;
+		padding: 18px 22px;
+		transition: background-color 0.15s;
+	}
+
+	.item:hover {
+		background-color: var(--color-surface-alt);
+	}
+
+	.item + .item {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.dot {
+		width: 10px;
+		height: 10px;
+		margin-top: 7px;
+		border-radius: 100%;
+	}
+
+	.body {
+		min-width: 0;
+	}
+
+	.date {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 5px;
+		color: var(--color-text-muted);
+		font-size: 13px;
+	}
+
+	.category {
+		font-size: 12px;
+	}
+
+	.text {
+		display: block;
+		margin: 0;
+		font-size: 15px;
+		white-space: pre-line;
+		overflow-wrap: break-word;
+	}
+
+	a.text:hover {
+		color: var(--color-accent-start);
+	}
+</style>

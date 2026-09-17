@@ -1,0 +1,167 @@
+---
+import Icon from '../parts/Icon.astro';
+import LinkCard from '../parts/LinkCard.astro';
+import Badge from '../parts/Badge.astro';
+import Quote from '../parts/Quote.astro';
+
+interface LinkItem {
+	title: string;
+	url: string;
+	iconSlug?: string;
+	iconSrc?: string;
+}
+
+interface LinkSection {
+	heading: string;
+	links: LinkItem[];
+}
+
+interface BadgeSection {
+	heading: string;
+	items: string[];
+}
+
+interface MetaItem {
+	icon: string;
+	label: string;
+}
+
+interface Props {
+	name: string;
+	description: string;
+	iconSrc?: string;
+	meta?: MetaItem[];
+	linkSections?: LinkSection[];
+	badgeSections?: BadgeSection[];
+	quote?: string[];
+}
+
+const {
+	name,
+	description,
+	iconSrc,
+	meta = [],
+	linkSections = [],
+	badgeSections = [],
+	quote,
+} = Astro.props;
+---
+
+<div class="profile">
+	<div class="profile-header">
+		<Icon src={iconSrc} alt={name} size="35%" initial={name.charAt(0)} />
+		<h1 class="name">{name}</h1>
+		<p class="description">{description}</p>
+
+		{
+			meta.length > 0 && (
+				<div class="meta">
+					{meta.map((item) => (
+						<Badge icon={item.icon}>{item.label}</Badge>
+					))}
+				</div>
+			)
+		}
+	</div>
+
+	{
+		quote && quote.length > 0 && (
+			<div class="section">
+				<Quote lines={quote} />
+			</div>
+		)
+	}
+
+	{
+		badgeSections.map((section) => (
+			<div class="section">
+				<div class="sub-head">
+					<h3>{section.heading}</h3>
+				</div>
+				<div class="badge-list">
+					{section.items.map((item) => (
+						<Badge>{item}</Badge>
+					))}
+				</div>
+			</div>
+		))
+	}
+
+	{
+		linkSections.map((section) => (
+			<div class="section">
+				<div class="sub-head">
+					<h3>{section.heading}</h3>
+				</div>
+				<div class="section-links">
+					{section.links.map((link) => (
+						<LinkCard title={link.title} url={link.url} iconSlug={link.iconSlug} iconSrc={link.iconSrc} />
+					))}
+				</div>
+			</div>
+		))
+	}
+</div>
+
+<style>
+	.profile {
+		border-radius: var(--radius-lg);
+		background-color: var(--color-surface);
+		padding: 32px 24px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.profile-header {
+		text-align: center;
+	}
+
+	.profile-header :global(.icon) {
+		margin: 0 auto;
+		box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+	}
+
+	.name {
+		margin: 14px 0 6px;
+		font-size: 32px;
+	}
+
+	.description {
+		margin: 0;
+		color: var(--color-text-light);
+		font-size: 15px;
+	}
+
+	.meta {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 8px;
+		margin-top: 14px;
+	}
+
+	.section {
+		margin-top: 24px;
+	}
+
+	.sub-head {
+		text-align: center;
+		margin-bottom: 8px;
+	}
+
+	.sub-head h3 {
+		font-size: 15px;
+		color: var(--color-text-light);
+	}
+
+	.section-links {
+		width: 90%;
+		margin: 0 auto;
+	}
+
+	.badge-list {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 8px;
+	}
+</style>

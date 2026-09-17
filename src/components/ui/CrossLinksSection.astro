@@ -1,0 +1,112 @@
+---
+import LinkCard from '../parts/LinkCard.astro';
+import Button from '../parts/Button.astro';
+import SectionHeading from '../parts/SectionHeading.astro';
+
+interface CrossLink {
+	url: string;
+	author: string;
+	thumbnail?: string;
+}
+
+interface Props {
+	links: CrossLink[];
+	applyUrl: string;
+	requirements: string[];
+}
+
+const { links, applyUrl, requirements } = Astro.props;
+---
+
+<section class="cross-links-section">
+	<SectionHeading>Cross Links</SectionHeading>
+	<div class="card">
+		<p class="subtitle">相互リンクの一覧です。</p>
+		<div class="links scrollbox">
+			{links.map((link) => <LinkCard title={link.author} url={link.url} iconSrc={link.thumbnail} />)}
+		</div>
+
+		<div class="apply">
+			<p class="apply-text">相互リンクをご希望の方は、お気軽にご連絡ください！</p>
+			<Button href={applyUrl} variant="primary" external>
+				相互リンクを申請する
+			</Button>
+
+			<div class="requirements">
+				<p class="requirements-title">要件</p>
+				<p class="requirements-lead">申請にあたって、以下が要求されます:</p>
+				<ul>
+					{requirements.map((requirement) => (
+						<li>{requirement}</li>
+					))}
+				</ul>
+			</div>
+		</div>
+	</div>
+</section>
+
+<style>
+	.card {
+		padding: 22px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.subtitle {
+		margin: 0 0 14px;
+		color: var(--color-text-light);
+		font-size: 13px;
+	}
+
+	.links {
+		max-height: 220px;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.apply {
+		margin-top: 20px;
+		padding-top: 20px;
+		border-top: 1px solid var(--color-border);
+		text-align: center;
+	}
+
+	.apply-text {
+		margin: 0 0 14px;
+		color: var(--color-text-light);
+		font-size: 13px;
+	}
+
+	.requirements {
+		margin-top: 20px;
+		text-align: left;
+	}
+
+	.requirements-title {
+		margin: 0 0 4px;
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+
+	.requirements-lead {
+		margin: 0 0 6px;
+		font-size: 12px;
+		color: var(--color-text-light);
+	}
+
+	.requirements ul {
+		margin: 0;
+		padding-left: 18px;
+	}
+
+	.requirements li {
+		font-size: 12px;
+		color: var(--color-text-light);
+	}
+
+	.requirements li + li {
+		margin-top: 4px;
+	}
+</style>

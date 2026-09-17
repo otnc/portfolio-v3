@@ -1,0 +1,249 @@
+---
+import SectionHeading from '../parts/SectionHeading.astro';
+import type { GithubActivity } from '../../lib/githubActivity';
+
+interface Props {
+	activity: GithubActivity | null;
+	profileUrl: string;
+}
+
+const { activity, profileUrl } = Astro.props;
+
+const allLanguages = activity?.languages ?? [];
+const maxCommitCount = activity ? Math.max(1, ...activity.commitActivity.map((day) => day.count)) : 1;
+---
+
+<section class="github-activity-section">
+	<SectionHeading>GitHub</SectionHeading>
+	{
+		activity ? (
+			<div class="card">
+				<div class="contributions-hero">
+					<p class="hero-value">
+						{activity.profile.totalContributions ?? '—'}
+					</p>
+					<p class="hero-label">
+						Total Contributions
+						{activity.profile.totalContributions === null && (
+							<span class="hero-note">(近日対応)</span>
+						)}
+					</p>
+				</div>
+
+				<div class="stats-grid">
+					<div class="stat">
+						<p class="value">{activity.profile.followers}</p>
+						<p class="label">Followers</p>
+					</div>
+					<div class="stat">
+						<p class="value">{activity.profile.publicRepos}</p>
+						<p class="label">Public Repos</p>
+					</div>
+					<div class="stat">
+						<p class="value">{activity.profile.totalStars}</p>
+						<p class="label">Total Stars</p>
+					</div>
+				</div>
+
+				{allLanguages.length > 0 && (
+					<div class="languages">
+						<div class="lang-bar">
+							{allLanguages.map((lang) => (
+								<span style={{ width: `${lang.percentage}%`, backgroundColor: lang.color }} />
+							))}
+						</div>
+						<ul class="lang-list scrollbox">
+							{allLanguages.map((lang) => (
+								<li>
+									<span class="dot" style={{ backgroundColor: lang.color }} />
+									<span class="lang-name">{lang.name}</span>
+									<span class="lang-percentage">{lang.percentage.toFixed(2)}%</span>
+								</li>
+							))}
+						</ul>
+					</div>
+				)}
+
+				{activity.commitActivity.length > 0 && (
+					<div class="commit-activity">
+						<div class="bars">
+							{activity.commitActivity.map((day) => (
+								<span
+									class="bar"
+									title={`${day.date}: ${day.count} commits`}
+									style={{ height: `${Math.max((day.count / maxCommitCount) * 100, 4)}%` }}
+								/>
+							))}
+						</div>
+						<p class="range-label">直近{activity.commitActivity.length}日間のコミット数</p>
+					</div>
+				)}
+			</div>
+		) : (
+			<p class="empty">
+				GitHubのアクティビティを取得できませんでした。
+				<a href={profileUrl} target="_blank" rel="noopener noreferrer">
+					GitHub
+				</a>
+				から確認してください。
+			</p>
+		)
+	}
+</section>
+
+<style>
+	.card {
+		padding: 22px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.contributions-hero {
+		padding: 20px;
+		margin-bottom: 14px;
+		border-radius: var(--radius-sm);
+		background: var(--color-accent-gradient);
+		color: var(--color-surface);
+		text-align: center;
+	}
+
+	.hero-value {
+		margin: 0;
+		font-size: 36px;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	.hero-label {
+		margin: 4px 0 0;
+		font-size: 13px;
+		opacity: 0.9;
+	}
+
+	.hero-note {
+		font-size: 12px;
+		opacity: 0.85;
+	}
+
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+		gap: 12px;
+	}
+
+	.stat {
+		padding: 14px 10px;
+		border-radius: var(--radius-sm);
+		background-color: var(--color-surface-alt);
+		text-align: center;
+	}
+
+	.value {
+		margin: 0;
+		font-size: 22px;
+		font-weight: 600;
+	}
+
+	.label {
+		margin: 2px 0 0;
+		font-size: 12px;
+		color: var(--color-text-light);
+	}
+
+	.languages {
+		margin-top: 20px;
+	}
+
+	.lang-bar {
+		display: flex;
+		height: 10px;
+		border-radius: 999px;
+		overflow: hidden;
+	}
+
+	.lang-bar span {
+		display: block;
+	}
+
+	.lang-list {
+		max-height: 210px;
+		list-style: none;
+		margin: 14px 0 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.lang-list li {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 6px 0;
+		font-size: 13px;
+	}
+
+	.lang-list li + li {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 100%;
+		flex-shrink: 0;
+	}
+
+	.lang-name {
+		color: var(--color-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.lang-percentage {
+		margin-left: auto;
+		color: var(--color-text-light);
+		white-space: nowrap;
+	}
+
+	.commit-activity {
+		margin-top: 20px;
+	}
+
+	.bars {
+		display: flex;
+		align-items: flex-end;
+		gap: 3px;
+		height: 60px;
+	}
+
+	.bar {
+		flex: 1;
+		min-width: 2px;
+		border-radius: 2px;
+		background: var(--color-accent-gradient);
+	}
+
+	.range-label {
+		margin: 8px 0 0;
+		font-size: 12px;
+		color: var(--color-text-muted);
+		text-align: right;
+	}
+
+	.empty {
+		margin: 0;
+		padding: 20px 22px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		color: var(--color-text-light);
+		font-size: 14px;
+	}
+
+	.empty a {
+		color: var(--color-accent-start);
+		font-weight: 600;
+	}
+</style>

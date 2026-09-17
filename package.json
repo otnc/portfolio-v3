@@ -11,10 +11,13 @@
     "preview": "astro preview",
     "astro": "astro"
   },
-  "dependencies": {
-    "astro": "^7.3.3"
-  },
   "allowScripts": {
     "esbuild": true
+  },
+  "dependencies": {
+    "astro": "^7.3.3",
+    "fast-xml-parser": "^5.11.1",
+    "simple-icons": "^16.31.0",
+    "subset-font": "^2.7.0"
   }
 }

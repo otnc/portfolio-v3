@@ -1,0 +1,22 @@
+/* montblank.fun 系譜のテーマカラー */
+:root {
+	--color-text: #1a1a1a;
+	--color-text-light: #666666;
+	--color-text-muted: #999999;
+
+	--color-surface: #ffffff;
+	--color-surface-alt: #f5f5f5;
+	--color-sec-background: #f8f8f8;
+
+	--color-border: #e0e0e0;
+
+	--color-accent-start: #6366f1;
+	--color-accent-end: #8b5cf6;
+	--color-accent-gradient: linear-gradient(45deg, var(--color-accent-start), var(--color-accent-end));
+
+	--radius-lg: 25px;
+	--radius-md: 15px;
+	--radius-sm: 10px;
+
+	--header-height: 84px;
+}

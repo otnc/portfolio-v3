@@ -1,0 +1,34 @@
+---
+interface Props {
+	href: string;
+	external?: boolean;
+}
+
+const { href, external = true } = Astro.props;
+---
+
+<a
+	class="more-link"
+	href={href}
+	target={external ? '_blank' : undefined}
+	rel={external ? 'noopener noreferrer' : undefined}
+>
+	More <span aria-hidden="true">→</span>
+</a>
+
+<style>
+	.more-link {
+		display: block;
+		margin-top: 14px;
+		padding: 4px 2px;
+		text-align: center;
+		color: var(--color-text-light);
+		font-size: 14px;
+		font-weight: 600;
+		transition: color 0.15s;
+	}
+
+	.more-link:hover {
+		color: var(--color-accent-start);
+	}
+</style>

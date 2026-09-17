@@ -1,17 +1,259 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Profile from '../components/ui/Profile.astro';
+import GitHubActivity from '../components/ui/GitHubActivity.astro';
+import BlogSection from '../components/ui/BlogSection.astro';
+import WorkSection from '../components/ui/WorkSection.astro';
+import ContributionsSection from '../components/ui/ContributionsSection.astro';
+import CareerSection from '../components/ui/CareerSection.astro';
+import type { CareerItem } from '../components/ui/CareerSection.astro';
+import CrossLinksSection from '../components/ui/CrossLinksSection.astro';
+import SectionHeading from '../components/parts/SectionHeading.astro';
+import { fetchLatestBlogPosts } from '../lib/blog';
+import { fetchWorks, fetchMergedContributions } from '../lib/github';
+import { fetchGithubActivity } from '../lib/githubActivity';
 
+const GITHUB_USER = 'otnc';
+const GITHUB_URL = `https://github.com/${GITHUB_USER}`;
+const BLOG_URL = 'https://blog.montblank.fun/';
+
+const profile = {
+	name: 'まろん｡',
+	iconSrc: '/icon.png',
+	description:
+		'主に JavaScript / TypeScript / Web を触っている大学生の個人開発勢です。主にOSS開発とネタ開発をしています。フロントエンドよりもバックエンドのほうが得意です。最近は開発バイトしてます。',
+	meta: [
+		{ icon: '🎂', label: '2006/11/02' },
+		{ icon: '📍', label: 'Hakodate, Hokkaido, Japan' },
+	],
+	quote: ['便利とロマンをシェアしよう', '思い立ったが吉日'],
+	badgeSections: [
+		{
+			heading: '所属',
+			items: ["公立はこだて未来大学 '25 (B1)", 'Oto Home', 'もふもふぽっぷ'],
+		},
+		{
+			heading: 'サークル',
+			items: ["Mariners' conference", 'Sound Create', '温泉同好会'],
+		},
+		{
+			heading: '実績',
+			items: ['P2HACKS 2025 Pre-PBL部門 最優秀賞', 'P2HACKS 2025 Pre-PBL部門 Fenrir賞'],
+		},
+	],
+	linkSections: [
+		{
+			heading: 'SNS',
+			links: [
+				{ title: 'GitHub', url: GITHUB_URL, iconSlug: 'github' },
+				{ title: 'Twitter', url: 'https://twitter.com/rin_montblank', iconSlug: 'twitter' },
+				{ title: 'WakaTime', url: 'https://wakatime.com/@otnc', iconSlug: 'wakatime' },
+				{
+					title: 'Discord',
+					url: 'https://discord.com/users/236727759672442880',
+					iconSlug: 'discord',
+				},
+				{ title: 'Misskey', url: 'https://misskey.otnc.dev/@m', iconSlug: 'misskey' },
+				{ title: 'mixi2', url: 'https://mixi.social/@rin_montblank', iconSrc: '/icons/mixi2.png' },
+				{
+					title: 'Instagram',
+					url: 'https://www.instagram.com/rin_montblank/',
+					iconSlug: 'instagram',
+				},
+				{
+					title: 'SoundCloud',
+					url: 'https://on.soundcloud.com/5OhpzmUg6gmYcFqe7N',
+					iconSlug: 'soundcloud',
+				},
+				{
+					title: 'Spotify',
+					url: 'https://open.spotify.com/user/31ichihsves6wrs7th6eoufpmuua',
+					iconSlug: 'spotify',
+				},
+			],
+		},
+	],
+};
+
+// montblank.fun/history から、経歴として特に関連度の高いものを抜粋
+const careerItems: CareerItem[] = [
+	{
+		year: 2026,
+		month: 9,
+		text: 'フェンリル株式会社\n2026年度サマーインターンシップ 参加',
+		url: 'https://fenrir-inc.com',
+		category: 'work',
+	},
+	{
+		year: 2025,
+		month: 12,
+		text: 'P2HACKS 2025\nPre-PBL部門 最優秀賞・Fenrir賞 受賞',
+		url: 'https://universe.mfmf.moe',
+		category: 'award',
+	},
+	{ year: 2025, month: 11, text: '株式会社函館ラボラトリ\n開発バイト開始', category: 'work' },
+	{ year: 2025, month: 4, text: '公立はこだて未来大学 入学', category: 'work' },
+	{ year: 2025, month: 3, text: '北海道岩見沢東高等学校 卒業', category: 'work' },
+	{ year: 2023, month: 7, text: 'OSS活動 開始', category: 'project' },
+	{
+		year: 2022,
+		month: 12,
+		text: 'Web開発 開始 (JavaScript / HTML / CSS)',
+		category: 'project',
+	},
+];
+
+const crossLinks = [
+	{ url: 'https://kinoemon.com', author: 'キノえもん' },
+	{ url: 'https://shikoshib.ru', author: 'shikoshib' },
+	{
+		url: 'https://profile.activetk.jp',
+		author: 'ActiveTK.',
+		thumbnail: 'https://profile.activetk.jp/avatar.png',
+	},
+	{ url: 'https://sugimoto.fun', author: 'sugimoto' },
+	{ url: 'https://negapainter.work', author: 'Np' },
+];
+
+const crossLinksApplyMessage = [
+	'相互リンクしませんか！',
+	'',
+	'URL:',
+	'あなたの名前:',
+	'紹介文:(任意)',
+	'サイト名:(任意)',
+	'サムネイルURL:(任意)',
+	'',
+	'※OGPから取得できるのであれば任意の部分は不要',
+].join('\n');
+const CROSS_LINKS_APPLY_URL = `https://twitter.com/messages/compose?recipient_id=1517667933291704320&text=${encodeURIComponent(crossLinksApplyMessage)}`;
+
+const crossLinksRequirements = [
+	'上のボタンからTwitterのDMにアクセスし、そこで申請すること',
+	'あなたのサイトが常時アクセス可能であること',
+	'あなたのサイトのURL、サイト名、名義の掲載を許可すること',
+	'あなたのサイトにこのサイトのURLとサイト名を掲載すること',
+];
+
+const [blogPosts, works, githubActivity, contributions] = await Promise.all([
+	fetchLatestBlogPosts(15),
+	fetchWorks(GITHUB_USER),
+	fetchGithubActivity(),
+	fetchMergedContributions(GITHUB_USER),
+]);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="まろん｡のポートフォリオ" description={profile.description}>
+	<div class="layout">
+		<div class="profile-block">
+			<SectionHeading>Profile</SectionHeading>
+			<Profile
+				name={profile.name}
+				iconSrc={profile.iconSrc}
+				description={profile.description}
+				meta={profile.meta}
+				quote={profile.quote}
+				badgeSections={profile.badgeSections}
+				linkSections={profile.linkSections}
+			/>
+		</div>
+		<GitHubActivity activity={githubActivity} profileUrl={GITHUB_URL} />
+		<CareerSection items={careerItems} />
+		<CrossLinksSection
+			links={crossLinks}
+			applyUrl={CROSS_LINKS_APPLY_URL}
+			requirements={crossLinksRequirements}
+		/>
+		<BlogSection posts={blogPosts} moreUrl={BLOG_URL} />
+		<WorkSection repos={works} profileUrl={GITHUB_URL} profileUser={GITHUB_USER} />
+		<ContributionsSection contributions={contributions} />
+	</div>
+</BaseLayout>
+
+<style>
+	.layout {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-areas:
+			'profile blog'
+			'profile works'
+			'github contributions'
+			'career crosslinks';
+		column-gap: 24px;
+		row-gap: 32px;
+		max-width: 1100px;
+		margin: 0 auto;
+		padding: 0 20px 48px;
+	}
+
+	.layout :global(.profile-block) {
+		grid-area: profile;
+	}
+
+	.layout :global(.github-activity-section) {
+		grid-area: github;
+	}
+
+	.layout :global(.career-section) {
+		grid-area: career;
+	}
+
+	.layout :global(.blog-section) {
+		grid-area: blog;
+	}
+
+	.layout :global(.work-section) {
+		grid-area: works;
+	}
+
+	.layout :global(.contributions-section) {
+		grid-area: contributions;
+	}
+
+	.layout :global(.cross-links-section) {
+		grid-area: crosslinks;
+	}
+
+	.layout :global(.profile-block),
+	.layout :global(.github-activity-section),
+	.layout :global(.career-section) {
+		width: 85%;
+		margin-left: auto;
+		margin-right: 0;
+	}
+
+	.layout :global(.blog-section),
+	.layout :global(.work-section),
+	.layout :global(.contributions-section),
+	.layout :global(.cross-links-section) {
+		width: 85%;
+		margin-left: 0;
+		margin-right: auto;
+	}
+
+	@media screen and (width <= 950px) {
+		.layout {
+			grid-template-columns: 100%;
+			grid-template-areas:
+				'profile'
+				'github'
+				'career'
+				'crosslinks'
+				'blog'
+				'works'
+				'contributions';
+		}
+
+		.layout :global(.profile-block),
+		.layout :global(.github-activity-section),
+		.layout :global(.career-section),
+		.layout :global(.cross-links-section),
+		.layout :global(.blog-section),
+		.layout :global(.work-section),
+		.layout :global(.contributions-section) {
+			width: 100%;
+			margin-left: 0;
+			margin-right: 0;
+		}
+	}
+</style>

@@ -1,0 +1,57 @@
+---
+import BlogPostCard from './BlogPostCard.astro';
+import SectionHeading from '../parts/SectionHeading.astro';
+import MoreLink from '../parts/MoreLink.astro';
+import type { BlogPost } from '../../lib/blog';
+
+interface Props {
+	posts: BlogPost[];
+	moreUrl: string;
+}
+
+const { posts, moreUrl } = Astro.props;
+---
+
+<section class="blog-section">
+	<SectionHeading>Blog</SectionHeading>
+	{
+		posts.length > 0 ? (
+			<div class="posts card scrollbox">
+				{posts.map((post) => (
+					<BlogPostCard
+						title={post.title}
+						url={post.url}
+						description={post.description}
+						pubDate={post.pubDate}
+					/>
+				))}
+			</div>
+		) : (
+			<p class="empty">最新記事を取得できませんでした。</p>
+		)
+	}
+	<MoreLink href={moreUrl} />
+</section>
+
+<style>
+	.card {
+		max-height: 720px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.card :global(.blog-post-card + .blog-post-card) {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.empty {
+		margin: 0;
+		padding: 20px 22px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		color: var(--color-text-light);
+		font-size: 14px;
+	}
+</style>

@@ -1,0 +1,30 @@
+; /etc/systemd/system/marron-portfolio.service
+;
+; Astro のビルド成果物 (dist/) と GitHub活動集計API を配信する Hono アプリ。
+;
+; 使い方:
+;   sudo cp deploy/systemd/marron-portfolio.service /etc/systemd/system/
+;   sudo systemctl daemon-reload
+;   sudo systemctl enable --now marron-portfolio
+
+[Unit]
+Description=marron portfolio (Hono static + API server)
+After=network.target
+
+[Service]
+Type=simple
+User=marron
+WorkingDirectory=/opt/marron-portfolio/server
+EnvironmentFile=/opt/marron-portfolio/server/.env
+ExecStart=/usr/bin/node dist/index.js
+Restart=on-failure
+RestartSec=5
+
+# 軽い sandboxing。GitHub API 通信とファイルキャッシュ書き込みだけ許可すればよい。
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/marron-portfolio/server/cache
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

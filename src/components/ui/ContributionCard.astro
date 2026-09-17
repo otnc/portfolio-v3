@@ -1,0 +1,74 @@
+---
+interface Props {
+	repo: string;
+	url: string;
+	mergedCount: number;
+	stars: number | null;
+}
+
+const { repo, url, mergedCount, stars } = Astro.props;
+---
+
+<a class="contribution-card" href={url} target="_blank" rel="noopener noreferrer">
+	<p class="repo">{repo}</p>
+	<div class="meta">
+		{typeof stars === 'number' && (
+			<span class="stars">
+				<span aria-hidden="true">★</span>
+				{stars}
+			</span>
+		)}
+		<span class="merged">
+			<span aria-hidden="true">⇄</span>
+			{mergedCount} merged
+		</span>
+	</div>
+</a>
+
+<style>
+	.contribution-card {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 14px;
+		padding: 18px 22px;
+		transition: background-color 0.15s;
+	}
+
+	.contribution-card:hover {
+		background-color: var(--color-surface-alt);
+	}
+
+	.repo {
+		margin: 0;
+		font-size: 15px;
+		font-weight: 600;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.meta {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+	}
+
+	.stars,
+	.merged {
+		display: inline-flex;
+		align-items: center;
+		gap: 4px;
+		color: var(--color-text-light);
+		font-size: 13px;
+		white-space: nowrap;
+	}
+
+	.stars span[aria-hidden] {
+		color: #f59e0b;
+	}
+
+	.merged span[aria-hidden] {
+		color: var(--color-accent-start);
+	}
+</style>

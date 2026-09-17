@@ -1,0 +1,54 @@
+---
+import ContributionCard from './ContributionCard.astro';
+import SectionHeading from '../parts/SectionHeading.astro';
+import type { Contribution } from '../../lib/github';
+
+interface Props {
+	contributions: Contribution[];
+}
+
+const { contributions } = Astro.props;
+---
+
+<section class="contributions-section">
+	<SectionHeading>Contributions</SectionHeading>
+	{
+		contributions.length > 0 ? (
+			<div class="items card scrollbox">
+				{contributions.map((contribution) => (
+					<ContributionCard
+						repo={contribution.repo}
+						url={contribution.url}
+						mergedCount={contribution.mergedCount}
+						stars={contribution.stars}
+					/>
+				))}
+			</div>
+		) : (
+			<p class="empty">マージされたPull Requestが見つかりませんでした。</p>
+		)
+	}
+</section>
+
+<style>
+	.card {
+		max-height: 620px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	}
+
+	.card :global(.contribution-card + .contribution-card) {
+		border-top: 1px solid var(--color-border);
+	}
+
+	.empty {
+		margin: 0;
+		padding: 20px 22px;
+		border-radius: var(--radius-md);
+		background-color: var(--color-surface);
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+		color: var(--color-text-light);
+		font-size: 14px;
+	}
+</style>

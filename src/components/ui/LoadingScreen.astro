@@ -1,0 +1,105 @@
+---
+---
+
+<noscript>
+	<style>
+		#loading-screen {
+			display: none !important;
+		}
+	</style>
+</noscript>
+
+<div id="loading-screen" role="status" aria-live="polite">
+	<img src="/logo.png" alt="まろん｡" class="logo" />
+	<div class="spinner" aria-hidden="true"></div>
+</div>
+
+<script>
+	function hideLoadingScreen() {
+		const el = document.getElementById('loading-screen');
+		if (!el) return;
+
+		el.classList.add('hidden');
+		el.addEventListener(
+			'transitionend',
+			() => {
+				el.remove();
+			},
+			{ once: true },
+		);
+	}
+
+	if (document.readyState === 'complete') {
+		hideLoadingScreen();
+	} else {
+		window.addEventListener('load', hideLoadingScreen, { once: true });
+	}
+</script>
+
+<style>
+	#loading-screen {
+		position: fixed;
+		inset: 0;
+		z-index: 9999;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 24px;
+		background-color: var(--color-sec-background);
+		opacity: 1;
+		transition: opacity 0.4s ease;
+	}
+
+	#loading-screen.hidden {
+		opacity: 0;
+		pointer-events: none;
+	}
+
+	.logo {
+		width: min(240px, 60vw);
+		height: auto;
+		animation: pulse 1.6s ease-in-out infinite;
+	}
+
+	.spinner {
+		width: 28px;
+		height: 28px;
+		border: 3px solid var(--color-border);
+		border-top-color: var(--color-accent-start);
+		border-radius: 100%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	@keyframes pulse {
+		0%,
+		100% {
+			opacity: 1;
+			transform: scale(1);
+		}
+		50% {
+			opacity: 0.85;
+			transform: scale(0.97);
+		}
+	}
+
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.logo {
+			animation: none;
+		}
+
+		.spinner {
+			animation-duration: 1.6s;
+		}
+
+		#loading-screen {
+			transition: none;
+		}
+	}
+</style>

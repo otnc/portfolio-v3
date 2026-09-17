@@ -1,0 +1,9 @@
+@font-face {
+	font-family: 'AkazukinPOP';
+	src:
+		url('/fonts/AkazukinPOP-subset.woff2') format('woff2'),
+		url('/fonts/AkazukinPOP.otf') format('opentype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
