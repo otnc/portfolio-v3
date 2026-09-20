@@ -8,6 +8,14 @@ const { repoUrl = 'https://github.com/otnc' } = Astro.props;
 
 <footer class="footer">
 	<div class="footer-contents">
+		<section class="contact" aria-labelledby="contact-heading">
+			<h2 id="contact-heading" class="contact-heading">
+				Contact
+			</h2>
+			<a class="contact-link" href="mailto:contact@montblank.fun">
+				contact@montblank.fun
+			</a>
+		</section>
 		<p>2022 - 2026</p>
 		<a href={repoUrl} target="_blank" rel="noopener noreferrer">
 			&copy; まろん｡ - All rights reserved.
@@ -35,5 +43,23 @@ const { repoUrl = 'https://github.com/otnc' } = Astro.props;
 
 	.footer-contents a:hover {
 		text-decoration: underline;
+	}
+
+	.contact {
+		margin-bottom: 14px;
+		padding-bottom: 14px;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+	}
+
+	.contact-heading {
+		margin: 0 0 4px;
+		font-size: 16px;
+		letter-spacing: 0.05em;
+	}
+
+	.contact-link {
+		font-weight: 600;
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 </style>
