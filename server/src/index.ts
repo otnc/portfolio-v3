@@ -24,6 +24,20 @@ for (const dataPath of ['/api/github/*', '/api/works/*', '/api/contributions/*',
 	});
 }
 
+// 全グリフ入りのフォントは、このサイト自身のページから読み込まれたときだけ返す。
+// ブラウザは @font-face の取得時に Sec-Fetch-Site / Sec-Fetch-Dest を付与する。
+// URL直打ち・他サイトからの直リンク・ヘッダーなしのツール(curl等)は 403 にする。
+// ヘッダーを偽装すれば取得できてしまうため完全な防止ではなく、手間を増やすための措置。
+app.use('/fonts/AkazukinPOP-full.woff2', async (c, next) => {
+	const site = c.req.header('sec-fetch-site');
+	const dest = c.req.header('sec-fetch-dest');
+	if (site !== 'same-origin' || dest !== 'font') return c.text('Forbidden', 403);
+
+	await next();
+	c.header('Cache-Control', 'private, max-age=86400');
+	c.header('X-Robots-Tag', 'noindex');
+});
+
 app.route('/api/github', githubRoute);
 app.route('/api/blog', blogRoute);
 app.route('/api/works', worksRoute);

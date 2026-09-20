@@ -1,9 +1,21 @@
+/* full: 全グリフ入り(ブラウザ側で動的に差し込まれる文字用。参照元チェック付きで配信)。 */
 @font-face {
 	font-family: 'AkazukinPOP';
 	src:
-		url('/fonts/AkazukinPOP-subset.woff2') format('woff2'),
+		url('/fonts/AkazukinPOP-full.woff2') format('woff2'),
 		url('/fonts/AkazukinPOP.otf') format('opentype');
 	font-weight: normal;
 	font-style: normal;
 	font-display: swap;
+}
+
+/* subset: ビルド時点で使っている文字だけ(軽量)。U+E000 はビルド時に実際の範囲へ置換される。
+   後に宣言したものが優先されるため、該当文字はこちらから読み込まれる。 */
+@font-face {
+	font-family: 'AkazukinPOP';
+	src: url('/fonts/AkazukinPOP-subset.woff2') format('woff2');
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+	unicode-range: U+E000;
 }

@@ -1,4 +1,9 @@
-// 使用フォントを実際に使われている文字だけに絞り込む Astro integration。
+// フォントを配信用に加工する Astro integration。
+// ブラウザ側で動的に差し込まれる文字(Blogの記事タイトルなど)にも対応するため、
+// 「使用文字だけのsubset」と「全グリフ入りのfull」の2つを生成する。
+// CSS側ではfullを先に、subsetを unicode-range 付きで後に宣言しており、ビルド時点で使っている文字は
+// 軽量なsubsetから、それ以外の文字が現れたときだけfullが読み込まれる。
+// fullはサーバー側で参照元チェックをかけて配信する(server/src/index.ts)。
 //
 // - dev サーバー起動時 (astro:server:setup):
 //     元フォントをそのまま /fonts/<name>.otf として配信する。 (開発中はどんな文字を打っても表示できるようにするため)
@@ -27,6 +32,47 @@ async function walkHtmlFiles(dir) {
 	return files;
 }
 
+function allBmpChars() {
+	let text = '';
+	for (let code = 0x20; code <= 0xffff; code += 1) {
+		if (code >= 0xd800 && code <= 0xdfff) continue;
+		text += String.fromCodePoint(code);
+	}
+	return text;
+}
+
+// 使用文字を unicode-range 形式 (連続する範囲はまとめる) にする。
+function toUnicodeRange(chars) {
+	const codes = [...chars].map((ch) => ch.codePointAt(0)).sort((a, b) => a - b);
+	const parts = [];
+	for (let i = 0; i < codes.length;) {
+		let j = i;
+		while (j + 1 < codes.length && codes[j + 1] === codes[j] + 1) j += 1;
+		const hex = (n) => n.toString(16).toUpperCase();
+		parts.push(i === j ? `U+${hex(codes[i])}` : `U+${hex(codes[i])}-${hex(codes[j])}`);
+		i = j + 1;
+	}
+	return parts.join(',');
+}
+
+// fonts.css のプレースホルダー (U+E000) を、実際にsubsetへ含めた文字の範囲に差し替える。
+async function writeUnicodeRange(outDir, chars, logger) {
+	const range = toUnicodeRange(chars);
+	const cssDir = path.join(outDir, '_astro');
+	let replaced = 0;
+	for (const name of await readdir(cssDir).catch(() => [])) {
+		if (!name.endsWith('.css')) continue;
+		const file = path.join(cssDir, name);
+		const css = await readFile(file, 'utf-8');
+		const next = css.replace(/unicode-range:\s*U\+E000/gi, () => `unicode-range:${range}`);
+		if (next !== css) {
+			await writeFile(file, next);
+			replaced += 1;
+		}
+	}
+	if (replaced === 0) logger.warn('unicode-range のプレースホルダーが見つかりませんでした。');
+}
+
 function extractText(html) {
 	return html
 		.replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -43,6 +89,7 @@ function extractText(html) {
 /**
  * @param {object} options
  * @param {URL} options.sourceFont 元フォント(未加工)の場所
+ * @param {string} [options.fullPublicPath] 全グリフ入りフォントの配信パス
  * @param {string} [options.publicPath] 本番用サブセットの配信パス
  * @param {string} [options.devPublicPath] 開発中に元フォントを配信するパス
  */
@@ -50,6 +97,7 @@ export default function subsetFontIntegration({
 	sourceFont,
 	publicPath = '/fonts/AkazukinPOP-subset.woff2',
 	devPublicPath = '/fonts/AkazukinPOP.otf',
+	fullPublicPath = '/fonts/AkazukinPOP-full.woff2',
 } = {}) {
 	if (!sourceFont) {
 		throw new Error('subsetFontIntegration: `sourceFont` is required');
@@ -91,6 +139,13 @@ export default function subsetFontIntegration({
 				const subsetBuffer = await subsetFont(sourceBuffer, [...chars].join(''), {
 					targetFormat: 'woff2',
 				});
+
+				await writeUnicodeRange(outDir, chars, logger);
+				const fullBuffer = await subsetFont(sourceBuffer, allBmpChars(), { targetFormat: 'woff2' });
+				const fullFile = path.join(outDir, fullPublicPath.replace(/^\//, ''));
+				await mkdir(path.dirname(fullFile), { recursive: true });
+				await writeFile(fullFile, fullBuffer);
+				logger.info(`full: ${(fullBuffer.length / 1024).toFixed(0)} KB を生成しました。`);
 
 				const outputFile = path.join(outDir, publicPath.replace(/^\//, ''));
 				await mkdir(path.dirname(outputFile), { recursive: true });
