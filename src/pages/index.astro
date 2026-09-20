@@ -9,6 +9,7 @@ import CareerSection from '../components/ui/CareerSection.astro';
 import type { CareerItem } from '../components/ui/CareerSection.astro';
 import CrossLinksSection from '../components/ui/CrossLinksSection.astro';
 import SectionHeading from '../components/parts/SectionHeading.astro';
+import { withFallback } from '../lib/api';
 import { fetchLatestBlogPosts } from '../lib/blog';
 import { fetchWorks, fetchMergedContributions } from '../lib/github';
 import { fetchGithubActivity } from '../lib/githubActivity';
@@ -145,11 +146,13 @@ const crossLinksRequirements = [
 	'あなたのサイトにこのサイトのURLとサイト名を掲載すること',
 ];
 
+// ここで取得した値はビルド時点の初期表示(スナップショット)。各セクションはブラウザ側でも
+// 最新値を再取得して差し替える(src/components/islands/)。
 const [blogPosts, works, githubActivity, contributions] = await Promise.all([
-	fetchLatestBlogPosts(15),
-	fetchWorks(GITHUB_USER),
-	fetchGithubActivity(),
-	fetchMergedContributions(GITHUB_USER),
+	withFallback(fetchLatestBlogPosts(15), []),
+	withFallback(fetchWorks(GITHUB_USER), []),
+	withFallback(fetchGithubActivity(), null),
+	withFallback(fetchMergedContributions(GITHUB_USER), []),
 ]);
 ---
 
@@ -176,7 +179,7 @@ const [blogPosts, works, githubActivity, contributions] = await Promise.all([
 		/>
 		<BlogSection posts={blogPosts} moreUrl={BLOG_URL} />
 		<WorkSection repos={works} profileUrl={GITHUB_URL} profileUser={GITHUB_USER} />
-		<ContributionsSection contributions={contributions} />
+		<ContributionsSection contributions={contributions} profileUser={GITHUB_USER} />
 	</div>
 </BaseLayout>
 

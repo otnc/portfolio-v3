@@ -1,11 +1,13 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import preact from '@astrojs/preact';
 import subsetFont from './integrations/subset-font.mjs';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://montblank.fun',
 	integrations: [
+		preact(),
 		subsetFont({
 			sourceFont: new URL('./src/fonts/AkazukinPOP.otf', import.meta.url),
 		}),

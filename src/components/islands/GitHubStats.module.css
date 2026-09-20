@@ -1,0 +1,166 @@
+.card {
+	padding: 22px;
+	border-radius: var(--radius-md);
+	background-color: var(--color-surface);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.contributionsHero {
+	padding: 20px;
+	margin-bottom: 14px;
+	border-radius: var(--radius-sm);
+	background: var(--color-accent-gradient);
+	color: var(--color-surface);
+	text-align: center;
+}
+
+.heroValue {
+	margin: 0;
+	font-size: 36px;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.heroLabel {
+	margin: 4px 0 0;
+	font-size: 13px;
+	opacity: 0.9;
+}
+
+.heroNote {
+	font-size: 12px;
+	opacity: 0.85;
+}
+
+.statsGrid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+	gap: 12px;
+}
+
+/* 幅の狭いモバイルでは2列になり、3つ目(Total Stars)だけ左寄りに余ってしまうため、
+   その行を全幅にして中央寄せする。 */
+@media screen and (width <= 480px) {
+	.statsGrid {
+		grid-template-columns: repeat(2, 1fr);
+	}
+
+	.stat:last-child {
+		grid-column: 1 / -1;
+	}
+}
+
+.stat {
+	padding: 14px 10px;
+	border-radius: var(--radius-sm);
+	background-color: var(--color-surface-alt);
+	text-align: center;
+}
+
+.value {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 600;
+}
+
+.label {
+	margin: 2px 0 0;
+	font-size: 12px;
+	color: var(--color-text-light);
+}
+
+.languages {
+	margin-top: 20px;
+}
+
+.langBar {
+	display: flex;
+	height: 10px;
+	border-radius: 999px;
+	overflow: hidden;
+}
+
+.langBar span {
+	display: block;
+}
+
+.langList {
+	max-height: 210px;
+	list-style: none;
+	margin: 14px 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.langList li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 0;
+	font-size: 13px;
+}
+
+.langList li + li {
+	border-top: 1px solid var(--color-border);
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 100%;
+	flex-shrink: 0;
+}
+
+.langName {
+	color: var(--color-text);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.langPercentage {
+	margin-left: auto;
+	color: var(--color-text-light);
+	white-space: nowrap;
+}
+
+.commitActivity {
+	margin-top: 20px;
+}
+
+.bars {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	height: 60px;
+}
+
+.bar {
+	flex: 1;
+	min-width: 2px;
+	border-radius: 2px;
+	background: var(--color-accent-gradient);
+}
+
+.rangeLabel {
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: var(--color-text-muted);
+	text-align: right;
+}
+
+.empty {
+	margin: 0;
+	padding: 20px 22px;
+	border-radius: var(--radius-md);
+	background-color: var(--color-surface);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+	color: var(--color-text-light);
+	font-size: 14px;
+}
+
+.empty a {
+	color: var(--color-accent-start);
+	font-weight: 600;
+}

@@ -1,8 +1,7 @@
-import { ofetch } from 'ofetch';
+import { api } from './api';
 
 // GitHub関連のデータ取得は全て server/ (Hono API) を経由する。
 // Astro/ブラウザ側から外部サイトを直接叩かないことで、任意の外部ホストへのリクエストや取得結果の扱いを1箇所(サーバー側)に集約する。
-const BASE_URL = 'http://127.0.0.1:3010/api';
 
 export interface LanguageStat {
 	name: string;
@@ -30,18 +29,10 @@ export interface Contribution {
 	stars: number | null;
 }
 
-export async function fetchWorks(user: string): Promise<Repo[]> {
-	try {
-		return await ofetch<Repo[]>(`${BASE_URL}/works/${user}`);
-	} catch {
-		return [];
-	}
+export function fetchWorks(user: string): Promise<Repo[]> {
+	return api<Repo[]>(`/works/${user}`);
 }
 
-export async function fetchMergedContributions(user: string): Promise<Contribution[]> {
-	try {
-		return await ofetch<Contribution[]>(`${BASE_URL}/contributions/${user}`);
-	} catch {
-		return [];
-	}
+export function fetchMergedContributions(user: string): Promise<Contribution[]> {
+	return api<Contribution[]>(`/contributions/${user}`);
 }

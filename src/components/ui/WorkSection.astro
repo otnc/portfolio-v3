@@ -1,7 +1,7 @@
 ---
-import WorkCard from './WorkCard.astro';
 import SectionHeading from '../parts/SectionHeading.astro';
 import MoreLink from '../parts/MoreLink.astro';
+import WorkList from '../islands/WorkList';
 import type { Repo } from '../../lib/github';
 
 interface Props {
@@ -15,56 +15,6 @@ const { repos, profileUrl, profileUser } = Astro.props;
 
 <section class="work-section">
 	<SectionHeading>Works</SectionHeading>
-	{repos.length > 0 ? (
-		<div class="repos card scrollbox">
-			{repos.map((repo) => (
-				<WorkCard
-					title={repo.owner === profileUser ? repo.name : `${repo.owner}/${repo.name}`}
-					url={repo.url}
-					description={repo.description}
-					stars={repo.stars}
-					pinned={repo.pinned}
-					languages={repo.languages}
-					topLanguage={repo.topLanguage}
-				/>
-			))}
-		</div>
-	) : (
-		<p class="empty">
-			リポジトリを取得できませんでした。
-			<a href={profileUrl} target="_blank" rel="noopener noreferrer">
-				GitHub
-			</a>
-			から確認してください。
-		</p>
-	)}
+	<WorkList client:load initial={repos} profileUrl={profileUrl} profileUser={profileUser} />
 	<MoreLink href={`${profileUrl}?tab=repositories`} />
 </section>
-
-<style>
-	.card {
-		max-height: 700px;
-		border-radius: var(--radius-md);
-		background-color: var(--color-surface);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-	}
-
-	.card :global(.work-card + .work-card) {
-		border-top: 1px solid var(--color-border);
-	}
-
-	.empty {
-		margin: 0;
-		padding: 20px 22px;
-		border-radius: var(--radius-md);
-		background-color: var(--color-surface);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-		color: var(--color-text-light);
-		font-size: 14px;
-	}
-
-	.empty a {
-		color: var(--color-accent-start);
-		font-weight: 600;
-	}
-</style>
