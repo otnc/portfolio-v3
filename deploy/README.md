@@ -11,7 +11,7 @@ Internet
    │ :3010 (127.0.0.1) ※ .env.example の PORT
    ▼
 [Hono app]     dist/ の静的配信 + /api/github, /api/works, /api/contributions,
-               /api/favicon を1プロセスで担当。
+               /api/blog, /api/favicon, /api/counter を1プロセスで担当。
                systemd (marron-portfolio.service) で常駐。
 ```
 
@@ -94,15 +94,20 @@ Astro は `server/`自身のURL (`http://127.0.0.1:<PORT>/api/github/otnc` な�
 
 - **pnpm workspace**: ルートの Astro サイトと `server/` を1つのworkspaceとして管理している(`pnpm-workspace.yaml`)。依存関係のインストールはリポジトリ直下で `pnpm install` を1回実行するだけでよい。
 - **Hono側でdist/を配信する理由**: nginxを二重に挟まず、静的配信とAPIを1プロセスに集約してシンプルに保つため。
-- **外部APIは全てserver/経由**: Astro/ブラウザ側からGitHubや他サイトを直接叩くことはせず、`server/`が公開する `/api/github/:user`・`/api/works/:user`・`/api/contributions/:user`・`/api/favicon` を経由する。任意の外部ホストへのリクエストや取得結果の扱いを1箇所に集約するため。
+- **外部APIは全てserver/経由**: Astro/ブラウザ側からGitHubや他サイトを直接叩くことはせず、`server/`が公開する `/api/github/:user`・`/api/works/:user`・`/api/contributions/:user`・`/api/blog`・`/api/favicon` を経由する。任意の外部ホストへのリクエストや取得結果の扱いを1箇所に集約するため。
 - **GitHub活動集計 (`/api/github/:user`)**: `otnc/github-most-used-langs` の考え方(言語内訳・プロフィール統計・日次アクティビティ)を Hono + GitHub GraphQL API で再実装し、GraphQL の `contributionsCollection` をアカウント作成年〜現在年まで1リクエストにまとめて問い合わせることで**全期間の総コントリビュート数**を新たに算出している(`server/src/lib/githubGraphql.ts` の `fetchAllTimeContributions`)。
 - **Works/Contributions (`/api/works/:user`, `/api/contributions/:user`)**: pinnedリポジトリ・言語内訳・マージ済みPRの集計を行う(`server/src/lib/githubWorks.ts`)。
 - **favicon (`/api/favicon`)**: 対象サイトのHTMLをUAを偽装して解析しfaviconを取得・配信するプロキシ(`server/src/lib/favicon.ts`)。SSRF対策としてプライベートIP/内部アドレスへのアクセスは拒否する。
-- **キャッシュ**: すべて `server/cache/` 配下にファイルキャッシュとして保存する。
-  - GitHub活動 (`server/cache/github-*.json`): stale-while-revalidate。起動時と `REFRESH_INTERVAL_MS` 間隔で裏更新し、GitHub側の障害時は直近のキャッシュを返し続ける(stale-if-error)。TTLは `.env` の `CACHE_TTL_SECONDS`。
-  - Works/Contributions (`server/cache/works/`, `server/cache/contributions/`): 最大12時間キャッシュ(`server/src/lib/simpleCache.ts`)。
+- **表示の更新方式(ビルド時のスナップショット + ブラウザ側での再取得)**: Blog / Works / Contributions / GitHub の各セクションはPreactのアイランド(`src/components/islands/`)で、ビルド時に取得した値を初期表示(スナップショット)としてHTMLに焼き込みつつ、ページを開いたブラウザからも `/api/*` を再取得して最新値に差し替える。表示を最新にするためだけにサイトを再ビルドする必要はない(コードや静的な文言を変えたときだけ再ビルドする)。JS無効環境やビルド時に取得へ失敗した場合はスナップショットのまま表示される。
+- **キャッシュ**: すべて `server/cache/` 配下にファイルキャッシュとして保存する。いずれもstale-while-revalidate(期限が切れていても古い値を即座に返し、裏で再取得する)で、再取得に失敗した場合は古い値を返し続ける(stale-if-error)ため、ブラウザから呼ばれても待たされない。
+  - GitHub活動 (`server/cache/github-*.json`): 起動時と `REFRESH_INTERVAL_MS` 間隔で裏更新する。TTLは `.env` の `CACHE_TTL_SECONDS`(既定1時間)。
+  - Works/Contributions (`server/cache/works/`, `server/cache/contributions/`): 1時間(`server/src/lib/githubWorks.ts`)。
+  - Blog (`server/cache/blog/`): RSSを10分(`server/src/lib/blog.ts`)。
+  - 上記は起動時にウォームアップされるため、再起動直後の最初の訪問者も待たされない。
   - 言語の色 (メモリキャッシュ): Linguist準拠の色一覧 (ozh/github-colors) を24時間キャッシュ。取得自体に失敗した場合のみ最低限のフォールバック色を使う(`server/src/lib/languageColors.ts`)。
   - favicon (`server/cache/favicon/`): 7日間キャッシュ。
   - 手動でキャッシュを消したい場合は該当ディレクトリを `rm -rf` してサービスを再起動すればよい。
+  - 取得に失敗したときは空の結果で上書きせず、キャッシュ済みの古い値を残す(fetcherは失敗時にthrowする)。
+- **アクセスカウンター (`/api/counter`)**: `server/data/counter.json` に永続化する。`server/cache/` と違って消してはいけないため、デプロイ時のrsyncでも `server/data` は除外すること。
 - **ピン留めリポジトリの取得**: GitHubには公式APIが無いため、プロフィールページのHTMLを解析して取得するのを基本とし、解析に失敗した場合のみ非公式API (pinned.berrysauce.dev) にフォールバックする。
 - **AnubisのOpen Graph passthrough (`deploy/anubis-policy.yaml`)**: 既定のボットポリシーのままだと、Discord/Twitter/Slack等のリンクプレビュー用ボットもUser-Agentに`Mozilla`を含むため一般ブラウザ扱いされてPoWチャレンジを出されてしまい、解けないのでOGPが一切表示されない。`openGraph.enabled: true` を有効にすると、チャレンジ対象のリクエストにもバックエンドから取得したOGPタグだけを含む軽量なHTMLが返るようになり、チャレンジを解けないボットでも正しいOGPプレビューを取得できる(通常ブラウザは従来通りチャレンジされ、挙動が変わるのはOGP取得時のみ)。
