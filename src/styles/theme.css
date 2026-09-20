@@ -20,6 +20,6 @@
 
 	--header-height: 84px;
 
-	/* 補助的な文字用の細いフォント(Google Fonts: M PLUS Rounded 1c Light)。 */
+	/* 補助的な文字用の細いフォント(Google Fonts: M PLUS Rounded 1c Regular)。 */
 	--font-thin: 'M PLUS Rounded 1c', 'AkazukinPOP', sans-serif;
 }
