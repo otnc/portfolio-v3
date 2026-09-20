@@ -19,4 +19,7 @@
 	--radius-sm: 10px;
 
 	--header-height: 84px;
+
+	/* 補助的な文字用の細いフォント(Google Fonts: M PLUS Rounded 1c Light)。 */
+	--font-thin: 'M PLUS Rounded 1c', 'AkazukinPOP', sans-serif;
 }

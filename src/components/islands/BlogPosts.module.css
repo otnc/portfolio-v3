@@ -72,8 +72,9 @@
 	border-radius: 999px;
 	background: var(--color-accent-gradient);
 	color: var(--color-surface);
+	font-family: var(--font-thin);
 	font-size: 11px;
-	font-weight: 700;
+	font-weight: 300;
 	letter-spacing: 0.05em;
 	vertical-align: 1px;
 }
