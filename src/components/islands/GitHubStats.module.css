@@ -15,6 +15,7 @@
 }
 
 .heroValue {
+	font-family: var(--font-display);
 	margin: 0;
 	font-size: 36px;
 	font-weight: 600;
@@ -58,6 +59,7 @@
 }
 
 .value {
+	font-family: var(--font-display);
 	margin: 0;
 	font-size: 22px;
 	font-weight: 600;
@@ -113,6 +115,7 @@
 }
 
 .langName {
+	font-family: var(--font-display);
 	color: var(--color-text);
 	overflow: hidden;
 	text-overflow: ellipsis;
