@@ -23,6 +23,7 @@
 }
 
 .repo {
+	font-family: var(--font-display);
 	margin: 0;
 	font-size: 15px;
 	font-weight: 600;

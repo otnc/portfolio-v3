@@ -20,6 +20,8 @@
 
 	--header-height: 84px;
 
-	/* 補助的な文字用の細いフォント(Google Fonts: M PLUS Rounded 1c Regular)。 */
+	/* 本文用の細いフォント(Google Fonts: M PLUS Rounded 1c Regular)。 */
 	--font-thin: 'M PLUS Rounded 1c', 'AkazukinPOP', sans-serif;
+	/* 見出し・プロジェクト名・記事タイトル用のポップなフォント。 */
+	--font-display: 'AkazukinPOP', sans-serif;
 }
