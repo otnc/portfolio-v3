@@ -1,6 +1,7 @@
 import { formatNumber } from '../../lib/format';
 import { fetchWorks, type Repo } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
+import Octicon from './Octicon';
 import styles from './WorkList.module.css';
 
 interface Props {
@@ -20,7 +21,7 @@ function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 				<p class={styles.title}>
 					{repo.pinned && (
 						<span class={styles.pin} title="Pinned" aria-label="Pinned">
-							📌
+							<Octicon name="pin" size={13} />
 						</span>
 					)}
 					{title}
@@ -36,9 +37,7 @@ function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 			</div>
 			{typeof repo.stars === 'number' && (
 				<span class={styles.stars}>
-					<span class={styles.star} aria-hidden="true">
-						★
-					</span>
+					<Octicon name="star-fill" class={styles.star} />
 					{formatNumber(repo.stars)}
 				</span>
 			)}

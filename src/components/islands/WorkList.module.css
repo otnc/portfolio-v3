@@ -80,6 +80,7 @@
 }
 
 .star {
+	flex-shrink: 0;
 	color: #f59e0b;
 }
 

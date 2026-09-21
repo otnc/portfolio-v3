@@ -1,6 +1,7 @@
 import { formatNumber } from '../../lib/format';
 import { fetchGithubActivity, type GithubActivity } from '../../lib/githubActivity';
 import { useFresh } from '../../lib/useFresh';
+import Octicon from './Octicon';
 import styles from './GitHubStats.module.css';
 
 interface Props {
@@ -28,15 +29,24 @@ function Activity({ activity }: { activity: GithubActivity }) {
 			<div class={styles.statsGrid}>
 				<div class={styles.stat}>
 					<p class={styles.value}>{formatNumber(profile.followers)}</p>
-					<p class={styles.label}>Followers</p>
+					<p class={styles.label}>
+						<Octicon name="people" class={styles.labelIcon} />
+						Followers
+					</p>
 				</div>
 				<div class={styles.stat}>
 					<p class={styles.value}>{formatNumber(profile.publicRepos)}</p>
-					<p class={styles.label}>Public Repos</p>
+					<p class={styles.label}>
+						<Octicon name="repo" class={styles.labelIcon} />
+						Public Repos
+					</p>
 				</div>
 				<div class={styles.stat}>
 					<p class={styles.value}>{formatNumber(profile.totalStars)}</p>
-					<p class={styles.label}>Total Stars</p>
+					<p class={styles.label}>
+						<Octicon name="star-fill" class={styles.labelIcon} />
+						Total Stars
+					</p>
 				</div>
 			</div>
 

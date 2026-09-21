@@ -1,6 +1,7 @@
 import { formatNumber } from '../../lib/format';
 import { fetchMergedContributions, type Contribution } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
+import Octicon from './Octicon';
 import styles from './ContributionList.module.css';
 
 interface Props {
@@ -23,12 +24,12 @@ export default function ContributionList({ initial, profileUser }: Props) {
 					<div class={styles.meta}>
 						{typeof item.stars === 'number' && (
 							<span class={`${styles.stat} ${styles.stars}`}>
-								<span aria-hidden="true">★</span>
+								<Octicon name="star-fill" />
 								{formatNumber(item.stars)}
 							</span>
 						)}
 						<span class={`${styles.stat} ${styles.merged}`}>
-							<span aria-hidden="true">⇄</span>
+							<Octicon name="git-merge" />
 							{formatNumber(item.mergedCount)} merged
 						</span>
 					</div>

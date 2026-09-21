@@ -167,3 +167,8 @@
 	color: var(--color-accent-start);
 	font-weight: 600;
 }
+
+.labelIcon {
+	margin-right: 4px;
+	vertical-align: -2px;
+}
