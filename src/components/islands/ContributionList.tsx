@@ -1,6 +1,7 @@
 import { formatCompactNumber, formatNumber } from '../../lib/format';
 import { fetchMergedContributions, type Contribution } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
+import LanguageRow from './LanguageRow';
 import Octicon from './Octicon';
 import RepoName from './RepoName';
 import styles from './ContributionList.module.css';
@@ -11,8 +12,7 @@ interface Props {
 }
 
 function ContributionCard({ item }: { item: Contribution }) {
-	const primaryLanguage = item.languages?.[0];
-	const percentage = primaryLanguage !== undefined ? primaryLanguage.percentage.toFixed(0) : undefined;
+	const languages = item.languages?.slice(0, 3) ?? [];
 
 	return (
 		<a class={styles.item} href={item.url} target="_blank" rel="noopener noreferrer">
@@ -20,13 +20,7 @@ function ContributionCard({ item }: { item: Contribution }) {
 				<p class={styles.repo}>
 					<RepoName text={item.repo} />
 				</p>
-				{primaryLanguage && (
-					<span class={styles.langLabel}>
-						<span class={styles.dot} style={{ backgroundColor: primaryLanguage.color }} />
-						{primaryLanguage.name}
-						{percentage !== undefined && <span class={styles.percentage}>{percentage}%</span>}
-					</span>
-				)}
+				{languages.length > 0 && <LanguageRow languages={languages} />}
 			</div>
 			<div class={styles.meta}>
 				<span

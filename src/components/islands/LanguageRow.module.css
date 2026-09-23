@@ -1,0 +1,29 @@
+.row {
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 12px;
+	overflow: hidden;
+	margin-top: 6px;
+}
+
+.item {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	flex-shrink: 0;
+	font-size: 11px;
+	color: var(--color-text-light);
+	white-space: nowrap;
+}
+
+.dot {
+	width: 6px;
+	height: 6px;
+	border-radius: 100%;
+	flex-shrink: 0;
+}
+
+.percentage {
+	color: var(--color-text-muted);
+}

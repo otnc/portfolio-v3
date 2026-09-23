@@ -1,6 +1,7 @@
 import { formatNumber } from '../../lib/format';
 import { fetchWorks, type Repo } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
+import LanguageRow from './LanguageRow';
 import Octicon from './Octicon';
 import RepoName from './RepoName';
 import styles from './WorkList.module.css';
@@ -13,8 +14,8 @@ interface Props {
 
 function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 	const title = repo.owner === profileUser ? repo.name : `${repo.owner}/${repo.name}`;
-	const primaryLanguage = repo.languages?.[0] ?? repo.topLanguage;
-	const percentage = repo.languages?.[0] !== undefined ? repo.languages[0].percentage.toFixed(0) : undefined;
+	// 言語ごとのバイト数が取れている場合は上位3件、取れなかった場合は検索結果のtopLanguage(割合なし)1件のみ。
+	const languages = repo.languages?.slice(0, 3) ?? (repo.topLanguage ? [repo.topLanguage] : []);
 
 	return (
 		<a class={styles.work} href={repo.url} target="_blank" rel="noopener noreferrer">
@@ -28,13 +29,7 @@ function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 					<RepoName text={title} />
 				</p>
 				{repo.description && <p class={styles.description}>{repo.description}</p>}
-				{primaryLanguage && (
-					<span class={styles.langLabel}>
-						<span class={styles.dot} style={{ backgroundColor: primaryLanguage.color }} />
-						{primaryLanguage.name}
-						{percentage !== undefined && <span class={styles.percentage}>{percentage}%</span>}
-					</span>
-				)}
+				{languages.length > 0 && <LanguageRow languages={languages} />}
 			</div>
 			{typeof repo.stars === 'number' && (
 				<span class={styles.stars}>
