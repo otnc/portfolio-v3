@@ -22,30 +22,35 @@ export default function ContributionList({ initial, profileUser }: Props) {
 				<a key={item.repo} class={styles.item} href={item.url} target="_blank" rel="noopener noreferrer">
 					<p class={styles.repo}>{item.repo}</p>
 					<div class={styles.meta}>
-						{typeof item.stars === 'number' && (
-							<span class={`${styles.stat} ${styles.stars}`} title={`${formatNumber(item.stars)} stars`}>
-								<Octicon name="star-fill" />
-								{formatCompactNumber(item.stars)}
+						<span
+							class={`${styles.stat} ${styles.stars}`}
+							title={typeof item.stars === 'number' ? `${formatNumber(item.stars)} stars` : undefined}
+						>
+							<Octicon name="star-fill" />
+							<span class={styles.statValue}>
+								{typeof item.stars === 'number' ? formatCompactNumber(item.stars) : '-'}
 							</span>
-						)}
-						{item.mergedCount > 0 && (
-							<span
-								class={`${styles.stat} ${styles.merged}`}
-								title={`${formatNumber(item.mergedCount)} merged pull requests`}
-							>
-								<Octicon name="git-merge" />
-								{formatNumber(item.mergedCount)}
+						</span>
+						<span
+							class={`${styles.stat} ${styles.merged}`}
+							title={
+								item.mergedCount > 0 ? `${formatNumber(item.mergedCount)} merged pull requests` : undefined
+							}
+						>
+							<Octicon name="git-merge" />
+							<span class={styles.statValue}>
+								{item.mergedCount > 0 ? formatCompactNumber(item.mergedCount) : '-'}
 							</span>
-						)}
-						{item.issueCount > 0 && (
-							<span
-								class={`${styles.stat} ${styles.issues}`}
-								title={`${formatNumber(item.issueCount)} issues opened`}
-							>
-								<Octicon name="issue-opened" />
-								{formatNumber(item.issueCount)}
+						</span>
+						<span
+							class={`${styles.stat} ${styles.issues}`}
+							title={item.issueCount > 0 ? `${formatNumber(item.issueCount)} issues opened` : undefined}
+						>
+							<Octicon name="issue-opened" />
+							<span class={styles.statValue}>
+								{item.issueCount > 0 ? formatCompactNumber(item.issueCount) : '-'}
 							</span>
-						)}
+						</span>
 					</div>
 				</a>
 			))}

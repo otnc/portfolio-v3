@@ -47,6 +47,10 @@
 	white-space: nowrap;
 }
 
+.statValue {
+	min-width: 3.2em;
+}
+
 .stars span[aria-hidden] {
 	color: #f59e0b;
 }
