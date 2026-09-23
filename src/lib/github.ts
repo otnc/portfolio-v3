@@ -28,6 +28,7 @@ export interface Contribution {
 	mergedCount: number;
 	issueCount: number;
 	stars: number | null;
+	languages?: LanguageStat[];
 }
 
 export function fetchWorks(user: string): Promise<Repo[]> {

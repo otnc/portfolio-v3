@@ -43,6 +43,7 @@ export interface Contribution {
 	mergedCount: number;
 	issueCount: number;
 	stars: number | null;
+	languages?: LanguageStat[];
 }
 
 interface SearchRepoItem {
@@ -213,7 +214,9 @@ async function fetchLanguageBreakdown(owner: string, name: string): Promise<Lang
 	}
 }
 
-async function withLanguageBreakdown(repos: Repo[]): Promise<Repo[]> {
+async function withLanguageBreakdown<T extends { owner: string; name: string; languages?: LanguageStat[] }>(
+	repos: T[],
+): Promise<T[]> {
 	return Promise.all(
 		repos.map(async (repo) => {
 			const languages = await fetchLanguageBreakdown(repo.owner, repo.name);
@@ -318,8 +321,10 @@ export async function getMergedContributions(user: string): Promise<Contribution
 			}),
 		);
 
+		const withLanguages = await withLanguageBreakdown(contributions);
+
 		// スター数が不明なもの(取得失敗)は末尾に回し、既知の値同士はスター数、同数なら貢献数(マージ+Issue)で比較する。
-		return contributions.sort((a, b) => {
+		return withLanguages.sort((a, b) => {
 			const aTotal = a.mergedCount + a.issueCount;
 			const bTotal = b.mergedCount + b.issueCount;
 			if (a.stars === null && b.stars === null) return bTotal - aTotal;
