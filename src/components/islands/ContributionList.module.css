@@ -55,6 +55,10 @@
 	color: var(--color-accent-start);
 }
 
+.issues span[aria-hidden] {
+	color: #57ab5a;
+}
+
 .empty {
 	margin: 0;
 	padding: 20px 22px;

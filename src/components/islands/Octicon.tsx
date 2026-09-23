@@ -1,4 +1,5 @@
 import gitMerge from '@primer/octicons/build/svg/git-merge-16.svg?raw';
+import issueOpened from '@primer/octicons/build/svg/issue-opened-16.svg?raw';
 import pin from '@primer/octicons/build/svg/pin-16.svg?raw';
 import people from '@primer/octicons/build/svg/people-16.svg?raw';
 import repo from '@primer/octicons/build/svg/repo-16.svg?raw';
@@ -6,6 +7,7 @@ import starFill from '@primer/octicons/build/svg/star-fill-16.svg?raw';
 
 const OCTICONS = {
 	'git-merge': gitMerge,
+	'issue-opened': issueOpened,
 	pin,
 	people,
 	repo,

@@ -41,6 +41,7 @@ export interface Contribution {
 	name: string;
 	url: string;
 	mergedCount: number;
+	issueCount: number;
 	stars: number | null;
 }
 
@@ -257,41 +258,74 @@ async function fetchRepoStars(owner: string, name: string): Promise<number | nul
 	}
 }
 
-// フォークして送った Pull Request が、外部(自分以外が所有する)リポジトリでマージされたものを集計する。GitHub に専用APIは無いため、Issues/PR検索の `is:merged` + 自分のリポジトリを除外する条件で代用する。
+// GitHub Search API は1クエリにつき最大1,000件(per_page 100 × 10ページ)までしか返さない。
+// この上限まで全ページを取得する。
+async function searchIssuesAll(query: string): Promise<SearchIssueItem[]> {
+	const items: SearchIssueItem[] = [];
+	for (let page = 1; page <= 10; page += 1) {
+		// ofetchの query オプションは値をそのままURLエンコードするため、+ 区切りだと
+		// リテラルの "+" として送られてしまう(スペースとして解釈されない)。単語区切りは半角スペースにする。
+		const data = await ofetch<{ items?: SearchIssueItem[] }>(SEARCH_ISSUES_URL, {
+			query: { q: query, per_page: 100, page },
+			headers: githubHeaders(),
+		});
+		const pageItems = Array.isArray(data.items) ? data.items : [];
+		items.push(...pageItems);
+		if (pageItems.length < 100) break;
+	}
+	return items;
+}
+
+function groupByRepo(items: SearchIssueItem[]): Map<string, number> {
+	const grouped = new Map<string, number>();
+	for (const item of items) {
+		const match = String(item.repository_url ?? '').match(/repos\/([^/]+)\/([^/]+)$/);
+		if (!match) continue;
+		const repo = `${match[1]}/${match[2]}`;
+		grouped.set(repo, (grouped.get(repo) ?? 0) + 1);
+	}
+	return grouped;
+}
+
+// フォークして送った Pull Request が外部(自分以外が所有する)リポジトリでマージされたものと、
+// 外部リポジトリに立てた Issue を、それぞれ集計する。GitHub に専用APIは無いため、Issues/PR検索の
+// `is:merged` / `type:issue` + 自分のリポジトリを除外する条件で代用する。
 // 規模(スター数)が大きいプロジェクト順に並べたいので、集計後にそれぞれのリポジトリのスター数を取得してソートし直す。
 export async function getMergedContributions(user: string): Promise<Contribution[]> {
 	return cached('contributions', user, WORKS_TTL_MS, async () => {
-		// ofetchの query オプションは値をそのままURLエンコードするため、+ 区切りだと
-		// リテラルの "+" として送られてしまう(スペースとして解釈されない)。単語区切りは半角スペースにする。
-		const query = `type:pr author:${user} is:merged -user:${user}`;
-		const data = await ofetch<{ items?: SearchIssueItem[] }>(SEARCH_ISSUES_URL, {
-			query: { q: query, per_page: 100 },
-			headers: githubHeaders(),
-		});
-		const items = Array.isArray(data.items) ? data.items : [];
+		const [mergedItems, issueItems] = await Promise.all([
+			searchIssuesAll(`type:pr author:${user} is:merged -user:${user}`),
+			searchIssuesAll(`type:issue author:${user} -user:${user}`),
+		]);
 
-		const grouped = new Map<string, number>();
-		for (const item of items) {
-			const match = String(item.repository_url ?? '').match(/repos\/([^/]+)\/([^/]+)$/);
-			if (!match) continue;
-			const repo = `${match[1]}/${match[2]}`;
-			grouped.set(repo, (grouped.get(repo) ?? 0) + 1);
-		}
+		const mergedByRepo = groupByRepo(mergedItems);
+		const issuesByRepo = groupByRepo(issueItems);
+		const repos = new Set([...mergedByRepo.keys(), ...issuesByRepo.keys()]);
 
 		const contributions = await Promise.all(
-			[...grouped.entries()].map(async ([repo, mergedCount]) => {
+			[...repos].map(async (repo) => {
 				const [owner, name] = repo.split('/');
 				const stars = await fetchRepoStars(owner, name);
-				return { repo, owner, name, url: `https://github.com/${repo}`, mergedCount, stars };
+				return {
+					repo,
+					owner,
+					name,
+					url: `https://github.com/${repo}`,
+					mergedCount: mergedByRepo.get(repo) ?? 0,
+					issueCount: issuesByRepo.get(repo) ?? 0,
+					stars,
+				};
 			}),
 		);
 
-		// スター数が不明なもの(取得失敗)は末尾に回し、既知の値同士はスター数、同数ならマージ数で比較する。
+		// スター数が不明なもの(取得失敗)は末尾に回し、既知の値同士はスター数、同数なら貢献数(マージ+Issue)で比較する。
 		return contributions.sort((a, b) => {
-			if (a.stars === null && b.stars === null) return b.mergedCount - a.mergedCount;
+			const aTotal = a.mergedCount + a.issueCount;
+			const bTotal = b.mergedCount + b.issueCount;
+			if (a.stars === null && b.stars === null) return bTotal - aTotal;
 			if (a.stars === null) return 1;
 			if (b.stars === null) return -1;
-			return b.stars - a.stars || b.mergedCount - a.mergedCount;
+			return b.stars - a.stars || bTotal - aTotal;
 		});
 	});
 }

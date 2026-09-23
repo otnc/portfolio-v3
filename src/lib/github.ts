@@ -26,6 +26,7 @@ export interface Contribution {
 	name: string;
 	url: string;
 	mergedCount: number;
+	issueCount: number;
 	stars: number | null;
 }
 
