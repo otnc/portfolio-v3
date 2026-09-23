@@ -2,6 +2,7 @@ import { formatNumber } from '../../lib/format';
 import { fetchWorks, type Repo } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
 import Octicon from './Octicon';
+import RepoName from './RepoName';
 import styles from './WorkList.module.css';
 
 interface Props {
@@ -24,7 +25,7 @@ function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 							<Octicon name="pin" size={13} />
 						</span>
 					)}
-					{title}
+					<RepoName text={title} />
 				</p>
 				{repo.description && <p class={styles.description}>{repo.description}</p>}
 				{primaryLanguage && (
