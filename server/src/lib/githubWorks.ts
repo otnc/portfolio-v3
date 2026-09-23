@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
 import { ofetch } from 'ofetch';
 import { env } from './env.js';
+import { fetchRepoActivityCounts } from './githubGraphql.js';
 import { getLanguageColor } from './languageColors.js';
 import { cached } from './simpleCache.js';
 import { getBrowserUserAgent } from './userAgent.js';
@@ -30,6 +31,9 @@ export interface Repo {
 	url: string;
 	description: string;
 	stars: number;
+	// リポジトリ全体(自分以外の分も含む)の合計マージ数・合計Issue数。
+	mergedCount: number | null;
+	issueCount: number | null;
 	pinned?: boolean;
 	languages?: LanguageStat[];
 	topLanguage?: { name: string; color: string };
@@ -71,6 +75,8 @@ async function fetchAllRepos(user: string): Promise<Repo[]> {
 				url: String(item.html_url ?? ''),
 				description: String(item.description ?? ''),
 				stars: Number(item.stargazers_count ?? 0),
+				mergedCount: null,
+				issueCount: null,
 				topLanguage: language ? { name: language, color: await getLanguageColor(language) } : undefined,
 			};
 		}),
@@ -133,6 +139,8 @@ async function scrapePinnedRepos(user: string): Promise<Repo[]> {
 				url: `https://github.com/${owner}/${name}`,
 				description: $item.find('.pinned-item-desc').first().text().trim(),
 				stars: stars ?? 0,
+				mergedCount: null,
+				issueCount: null,
 				pinned: true,
 				topLanguage: languageName ? { name: languageName, color: languageColor ?? '' } : undefined,
 			};
@@ -169,6 +177,8 @@ async function fetchPinnedFromApi(user: string): Promise<Repo[]> {
 				url: `https://github.com/${owner}/${name}`,
 				description: String(item.description ?? ''),
 				stars: Number(item.stars ?? 0),
+				mergedCount: null,
+				issueCount: null,
 				pinned: true,
 				topLanguage: language
 					? { name: language, color: languageColor ?? (await getLanguageColor(language)) }
@@ -225,6 +235,15 @@ async function withLanguageBreakdown<T extends { owner: string; name: string; la
 	);
 }
 
+// リポジトリ全体(自分以外の分も含む)の合計マージ数・合計Issue数を付与する。
+async function withActivityCounts(repos: Repo[]): Promise<Repo[]> {
+	const counts = await fetchRepoActivityCounts(repos.map((repo) => ({ owner: repo.owner, name: repo.name })));
+	return repos.map((repo) => {
+		const count = counts.get(`${repo.owner}/${repo.name}`);
+		return count ? { ...repo, ...count } : repo;
+	});
+}
+
 export async function getWorks(user: string, otherLimit = 9): Promise<Repo[]> {
 	return cached('works', user, WORKS_TTL_MS, async () => {
 		const [allRepos, pinnedRepos] = await Promise.all([fetchAllRepos(user), fetchPinnedRepos(user)]);
@@ -232,7 +251,8 @@ export async function getWorks(user: string, otherLimit = 9): Promise<Repo[]> {
 		const pinnedUrlSet = new Set(pinnedRepos.map((repo) => repo.url));
 		const otherRepos = allRepos.filter((repo) => !pinnedUrlSet.has(repo.url)).slice(0, otherLimit);
 
-		return withLanguageBreakdown([...pinnedRepos, ...otherRepos]);
+		const repos = await withLanguageBreakdown([...pinnedRepos, ...otherRepos]);
+		return withActivityCounts(repos);
 	});
 }
 

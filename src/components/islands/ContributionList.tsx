@@ -1,9 +1,8 @@
-import { formatCompactNumber, formatNumber } from '../../lib/format';
 import { fetchMergedContributions, type Contribution } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
 import LanguageRow from './LanguageRow';
-import Octicon from './Octicon';
 import RepoName from './RepoName';
+import StatsColumn from './StatsColumn';
 import styles from './ContributionList.module.css';
 
 interface Props {
@@ -22,35 +21,7 @@ function ContributionCard({ item }: { item: Contribution }) {
 				</p>
 				{languages.length > 0 && <LanguageRow languages={languages} />}
 			</div>
-			<div class={styles.meta}>
-				<span
-					class={`${styles.stat} ${styles.stars}`}
-					title={typeof item.stars === 'number' ? `${formatNumber(item.stars)} stars` : undefined}
-				>
-					<Octicon name="star-fill" />
-					<span class={styles.statValue}>
-						{typeof item.stars === 'number' ? formatCompactNumber(item.stars) : '-'}
-					</span>
-				</span>
-				<span
-					class={`${styles.stat} ${styles.merged}`}
-					title={item.mergedCount > 0 ? `${formatNumber(item.mergedCount)} merged pull requests` : undefined}
-				>
-					<Octicon name="git-merge" />
-					<span class={styles.statValue}>
-						{item.mergedCount > 0 ? formatCompactNumber(item.mergedCount) : '-'}
-					</span>
-				</span>
-				<span
-					class={`${styles.stat} ${styles.issues}`}
-					title={item.issueCount > 0 ? `${formatNumber(item.issueCount)} issues opened` : undefined}
-				>
-					<Octicon name="issue-opened" />
-					<span class={styles.statValue}>
-						{item.issueCount > 0 ? formatCompactNumber(item.issueCount) : '-'}
-					</span>
-				</span>
-			</div>
+			<StatsColumn stars={item.stars} merged={item.mergedCount} issues={item.issueCount} />
 		</a>
 	);
 }

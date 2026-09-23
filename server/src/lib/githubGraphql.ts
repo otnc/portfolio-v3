@@ -224,3 +224,67 @@ export async function fetchRecentActivity(login: string, days = 30): Promise<Com
 		.flatMap((week) => week.contributionDays)
 		.map((day) => ({ date: day.date, count: day.contributionCount }));
 }
+
+// --- リポジトリごとの合計マージ数・合計Issue数(自分以外を含む、リポジトリ全体の数) ---
+// エイリアスを使って複数リポジトリを1回のクエリにまとめる。1リクエストに詰め込みすぎないよう分割する。
+const REPO_ACTIVITY_CHUNK_SIZE = 30;
+
+export interface RepoActivityCounts {
+	mergedCount: number | null;
+	issueCount: number | null;
+}
+
+interface RepoActivityResult {
+	[alias: string]: { pullRequests: { totalCount: number }; issues: { totalCount: number } } | null;
+}
+
+export async function fetchRepoActivityCounts(
+	repos: { owner: string; name: string }[],
+): Promise<Map<string, RepoActivityCounts>> {
+	const result = new Map<string, RepoActivityCounts>();
+
+	for (let i = 0; i < repos.length; i += REPO_ACTIVITY_CHUNK_SIZE) {
+		const chunk = repos.slice(i, i + REPO_ACTIVITY_CHUNK_SIZE);
+		const variables: Record<string, string> = {};
+		const fields = chunk
+			.map((repo, index) => {
+				variables[`owner${index}`] = repo.owner;
+				variables[`name${index}`] = repo.name;
+				return /* GraphQL */ `
+					r${index}: repository(owner: $owner${index}, name: $name${index}) {
+						pullRequests(states: MERGED) {
+							totalCount
+						}
+						issues {
+							totalCount
+						}
+					}`;
+			})
+			.join('\n');
+		const signature = chunk.map((_, index) => `$owner${index}: String!, $name${index}: String!`).join(', ');
+
+		const query = /* GraphQL */ `
+			query (${signature}) {
+				${fields}
+			}
+		`;
+
+		// リポジトリが削除・リネームされていた場合、そのエイリアスだけ null になり errors にも載るが、
+		// 他のエイリアスのデータは問題なく返るため、エラーで全体を諦めず部分的な結果として扱う。
+		const json = await ofetch<{ data?: RepoActivityResult; errors?: { message: string }[] }>(GRAPHQL_URL, {
+			method: 'POST',
+			headers: { Authorization: `Bearer ${env.githubToken}` },
+			body: { query, variables },
+		});
+
+		chunk.forEach((repo, index) => {
+			const node = json.data?.[`r${index}`];
+			result.set(`${repo.owner}/${repo.name}`, {
+				mergedCount: node?.pullRequests.totalCount ?? null,
+				issueCount: node?.issues.totalCount ?? null,
+			});
+		});
+	}
+
+	return result;
+}

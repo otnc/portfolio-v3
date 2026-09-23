@@ -39,40 +39,6 @@
 	white-space: nowrap;
 }
 
-.meta {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	gap: 2px;
-}
-
-.stat {
-	display: inline-flex;
-	align-items: center;
-	gap: 4px;
-	color: var(--color-text-light);
-	font-size: 13px;
-	white-space: nowrap;
-}
-
-.statValue {
-	display: inline-block;
-	min-width: 3.2em;
-	text-align: right;
-}
-
-.stars span[aria-hidden] {
-	color: #f59e0b;
-}
-
-.merged span[aria-hidden] {
-	color: var(--color-accent-start);
-}
-
-.issues span[aria-hidden] {
-	color: #57ab5a;
-}
-
 .empty {
 	margin: 0;
 	padding: 20px 22px;

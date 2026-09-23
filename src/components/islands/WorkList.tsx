@@ -1,9 +1,9 @@
-import { formatNumber } from '../../lib/format';
 import { fetchWorks, type Repo } from '../../lib/github';
 import { useFresh } from '../../lib/useFresh';
 import LanguageRow from './LanguageRow';
 import Octicon from './Octicon';
 import RepoName from './RepoName';
+import StatsColumn from './StatsColumn';
 import styles from './WorkList.module.css';
 
 interface Props {
@@ -31,12 +31,7 @@ function WorkCard({ repo, profileUser }: { repo: Repo; profileUser: string }) {
 				{repo.description && <p class={styles.description}>{repo.description}</p>}
 				{languages.length > 0 && <LanguageRow languages={languages} />}
 			</div>
-			{typeof repo.stars === 'number' && (
-				<span class={styles.stars}>
-					<Octicon name="star-fill" class={styles.star} />
-					{formatNumber(repo.stars)}
-				</span>
-			)}
+			<StatsColumn stars={repo.stars} merged={repo.mergedCount} issues={repo.issueCount} />
 		</a>
 	);
 }

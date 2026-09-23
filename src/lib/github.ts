@@ -15,6 +15,9 @@ export interface Repo {
 	url: string;
 	description: string;
 	stars: number;
+	// リポジトリ全体(自分以外の分も含む)の合計マージ数・合計Issue数。
+	mergedCount: number | null;
+	issueCount: number | null;
 	pinned?: boolean;
 	languages?: LanguageStat[];
 	topLanguage?: { name: string; color: string };
