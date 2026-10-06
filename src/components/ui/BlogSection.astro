@@ -6,14 +6,24 @@ import type { BlogPost } from '../../lib/blog';
 
 interface Props {
 	posts: BlogPost[];
-	moreUrl: string;
+	links: { label: string; url: string }[];
 }
 
-const { posts, moreUrl } = Astro.props;
+const { posts, links } = Astro.props;
 ---
 
 <section class="blog-section">
 	<SectionHeading>Blog</SectionHeading>
 	<BlogPosts client:load initial={posts} />
-	<MoreLink href={moreUrl} />
+	<div class="more-links">
+		{links.map((link) => <MoreLink href={link.url} label={link.label} />)}
+	</div>
 </section>
+
+<style>
+	.more-links {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 8px;
+	}
+</style>

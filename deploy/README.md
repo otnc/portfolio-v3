@@ -102,7 +102,7 @@ Astro は `server/`自身のURL (`http://127.0.0.1:<PORT>/api/github/otnc` な�
 - **キャッシュ**: すべて `server/cache/` 配下にファイルキャッシュとして保存する。いずれもstale-while-revalidate(期限が切れていても古い値を即座に返し、裏で再取得する)で、再取得に失敗した場合は古い値を返し続ける(stale-if-error)ため、ブラウザから呼ばれても待たされない。
   - GitHub活動 (`server/cache/github-*.json`): 起動時と `REFRESH_INTERVAL_MS` 間隔で裏更新する。TTLは `.env` の `CACHE_TTL_SECONDS`(既定1時間)。
   - Works/Contributions (`server/cache/works/`, `server/cache/contributions/`): 1時間(`server/src/lib/githubWorks.ts`)。
-  - Blog (`server/cache/blog/`): RSSを10分(`server/src/lib/blog.ts`)。
+  - Blog (`server/cache/blog/`): Blog・Zenn・Qiita・noteのRSS/Atomを統合し、10分(`server/src/lib/blog.ts`)。
   - 上記は起動時にウォームアップされるため、再起動直後の最初の訪問者も待たされない。
   - 言語の色 (メモリキャッシュ): Linguist準拠の色一覧 (ozh/github-colors) を24時間キャッシュ。取得自体に失敗した場合のみ最低限のフォールバック色を使う(`server/src/lib/languageColors.ts`)。
   - favicon (`server/cache/favicon/`): 7日間キャッシュ。

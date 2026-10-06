@@ -5,8 +5,9 @@ export interface BlogPost {
 	url: string;
 	description: string;
 	pubDate: string;
+	source: string;
 }
 
-export function fetchLatestBlogPosts(limit = 15): Promise<BlogPost[]> {
+export function fetchLatestBlogPosts(limit = 30): Promise<BlogPost[]> {
 	return api<BlogPost[]>('/blog', { query: { limit } });
 }

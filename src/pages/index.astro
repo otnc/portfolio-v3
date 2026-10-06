@@ -16,7 +16,12 @@ import { fetchGithubActivity } from '../lib/githubActivity';
 
 const GITHUB_USER = 'otnc';
 const GITHUB_URL = `https://github.com/${GITHUB_USER}`;
-const BLOG_URL = 'https://blog.montblank.fun/';
+const BLOG_LINKS = [
+	{ label: 'Blog', url: 'https://blog.montblank.fun/' },
+	{ label: 'Zenn', url: 'https://zenn.dev/devuloper' },
+	{ label: 'Qiita', url: 'https://qiita.com/devuloper' },
+	{ label: 'note', url: 'https://note.com/otoneko1102' },
+];
 
 const profile = {
 	name: 'まろん｡',
@@ -156,7 +161,7 @@ const crossLinksRequirements = [
 // ここで取得した値はビルド時点の初期表示(スナップショット)。各セクションはブラウザ側でも
 // 最新値を再取得して差し替える(src/components/islands/)。
 const [blogPosts, works, githubActivity, contributions] = await Promise.all([
-	withFallback(fetchLatestBlogPosts(15), []),
+	withFallback(fetchLatestBlogPosts(30), []),
 	withFallback(fetchWorks(GITHUB_USER), []),
 	withFallback(fetchGithubActivity(), null),
 	withFallback(fetchMergedContributions(GITHUB_USER), []),
@@ -184,7 +189,7 @@ const [blogPosts, works, githubActivity, contributions] = await Promise.all([
 			applyUrl={CROSS_LINKS_APPLY_URL}
 			requirements={crossLinksRequirements}
 		/>
-		<BlogSection posts={blogPosts} moreUrl={BLOG_URL} />
+		<BlogSection posts={blogPosts} links={BLOG_LINKS} />
 		<WorkSection repos={works} profileUrl={GITHUB_URL} profileUser={GITHUB_USER} />
 		<ContributionsSection contributions={contributions} profileUser={GITHUB_USER} />
 	</div>

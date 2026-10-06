@@ -28,7 +28,7 @@ interface Props {
 }
 
 export default function BlogPosts({ initial }: Props) {
-	const posts = useFresh(initial, () => fetchLatestBlogPosts(15));
+	const posts = useFresh(initial, () => fetchLatestBlogPosts(30));
 
 	if (posts.length === 0) {
 		return <p class={styles.empty}>最新記事を取得できませんでした。</p>;
@@ -43,6 +43,7 @@ export default function BlogPosts({ initial }: Props) {
 						<div class={styles.text}>
 							<p class={styles.title}>
 								{post.pubDate && isNew(post.pubDate) && <span class={styles.newBadge}>New</span>}
+								<span class={styles.source}>{post.source}</span>
 								{post.title}
 							</p>
 							{post.description && <p class={styles.description}>{post.description}</p>}

@@ -68,7 +68,7 @@ void warmCache(env.defaultUser);
 for (const warm of [
 	() => getWorks(env.defaultUser),
 	() => getMergedContributions(env.defaultUser),
-	() => getBlogPosts(15),
+	() => getBlogPosts(30),
 ]) {
 	warm().catch((error) => console.error('[cache] 起動時のウォームアップに失敗:', error));
 }

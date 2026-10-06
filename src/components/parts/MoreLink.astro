@@ -1,10 +1,11 @@
 ---
 interface Props {
 	href: string;
+	label?: string;
 	external?: boolean;
 }
 
-const { href, external = true } = Astro.props;
+const { href, label = 'More', external = true } = Astro.props;
 ---
 
 <a
@@ -13,7 +14,7 @@ const { href, external = true } = Astro.props;
 	target={external ? '_blank' : undefined}
 	rel={external ? 'noopener noreferrer' : undefined}
 >
-	More <span aria-hidden="true">→</span>
+	{label} <span aria-hidden="true">→</span>
 </a>
 
 <style>
