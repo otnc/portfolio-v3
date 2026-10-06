@@ -69,34 +69,37 @@ sudo systemctl reload nginx
 sudo systemctl disable --now anubis@marron-portfolio
 ```
 
-`anubis@marron-portfolio`を停止したあと、Anubis用の`8923`ポートがLISTENしていないことを確認します。
+`anubis@marron-portfolio`を停止したあと、ポートの確認を行う。他のサービス(`anubis@openmiq-web`など)が`8923`を使用している場合があるため、`8923`が空いていること自体は要件ではない。
 
 ```bash
-sudo ss -tlnp | grep -E ':(8923|3010)\b'
+sudo systemctl is-active anubis@marron-portfolio || true
+sudo ss -tlnp | grep -E ':(3010)\b'
 ```
 
 ## デプロイ更新時 (再ビルド〜反映)
 
-**`systemctl restart` は `dist/index.js` を再実行するだけで、TypeScriptの再コンパイルは一切行わない。** `server/`側のコードを変更した場合、先に `server/` を再ビルドしてから再起動しないと、再起動しても変更前のコードが動き続けるので注意(このREADMEの旧版はここが抜けていた)。
+本番ディレクトリはGit管理せず、リポジトリの作業ツリーから同期して更新する。`/opt/marron-portfolio`の`.env`、キャッシュ、永続データは更新スクリプトが保持する。
 
 ```bash
-cd /opt/marron-portfolio
-git pull
-pnpm install
-
-# 1. server/ を先に再ビルド & 再起動する
-#    (Astroのビルドは server/ に問い合わせて結果を静的ページへ焼き込むため、
-#     server/ 側の変更を先に反映させておかないと古いデータのままビルドされてしまう)
-cd server
-pnpm run build            # dist/index.js を再生成
-cd ..
-sudo systemctl restart marron-portfolio
-
-# 2. そのあとAstroを再ビルド (起動中のserver/へ問い合わせてビルド時に焼き込む)
-pnpm run build
+cd /root/projects/portfolio-v3
+deploy/update.sh
 ```
 
-`server/`側の変更が**キャッシュされたデータの中身**(GitHubの言語色・pinnedリポジトリ・コントリビュートの集計方法など)に関わる場合は、古いキャッシュが残ったままだと再ビルドしても変化が見えないことがある。その場合は該当キャッシュを消してから `marron-portfolio` を再起動する:
+このスクリプトは次の順序で更新する。
+
+1. ソースを`/opt/marron-portfolio`へ同期する
+2. 依存関係をインストールする
+3. `server/`をビルドしてHonoを再起動する
+4. Astroをビルドして静的ファイルを生成する
+5. Honoを再起動して新しい`dist/`を配信する
+
+別の配置先を使う場合は`TARGET_DIR`で変更できる。
+
+```bash
+TARGET_DIR=/srv/marron-portfolio deploy/update.sh
+```
+
+`server/`側の変更が**キャッシュされたデータの中身**(GitHubの言語色・pinnedリポジトリ・コントリビュートの集計方法など)に関わる場合は、古いキャッシュが残ったままだと再ビルドしても変化が見えないことがある。その場合は該当キャッシュを消してから`marron-portfolio`を再起動する:
 
 ```bash
 rm -rf server/cache/<該当ディレクトリ>   # 例: server/cache/works, server/cache/contributions
