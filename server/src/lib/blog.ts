@@ -1,3 +1,4 @@
+import { load } from 'cheerio';
 import { XMLParser } from 'fast-xml-parser';
 import { ofetch } from 'ofetch';
 import { cached } from './simpleCache.js';
@@ -46,6 +47,13 @@ function text(value: unknown): string {
 	return '';
 }
 
+function plainDescription(value: unknown): string {
+	const description = text(value);
+	if (!description.includes('<')) return description;
+
+	return load(description).text().replace(/\s+/g, ' ').trim();
+}
+
 function link(value: unknown): string {
 	if (typeof value === 'string') return value;
 	if (!Array.isArray(value) && value && typeof value === 'object') {
@@ -75,7 +83,7 @@ async function fetchFeed({ source, url }: FeedConfig): Promise<BlogPost[]> {
 		return {
 			title: text(item.title),
 			url: link(item.link) || text(item.url),
-			description: text(item.description ?? item.summary ?? item.content),
+			description: plainDescription(item.description ?? item.summary ?? item.content),
 			pubDate: text(item.pubDate ?? (isAtom ? item.published ?? item.updated : undefined)),
 			source,
 		};
