@@ -4,10 +4,7 @@
 Internet
    │ :443
    ▼
-[nginx]        TLS終端のみ。すべてを Anubis へ流す。
-   │ :8923 (127.0.0.1) ※ deploy/anubis.env の BIND
-   ▼
-[Anubis]       PoW方式でボットを弾くリバースプロキシ。
+[nginx]        TLS終端。Honoアプリへ直接リバースプロキシ。
    │ :3010 (127.0.0.1) ※ .env.example の PORT
    ▼
 [Hono app]     dist/ の静的配信 + /api/github, /api/works, /api/contributions,
@@ -39,7 +36,7 @@ cd server
 pnpm run build            # dist/index.js が生成される
 cd ..
 
-# 5. Anubis をインストール (公式 apt リポジトリ, 詳細は
+# 5. (任意) Anubis をインストール (公式 apt リポジトリ, 詳細は
 #    https://anubis.techaro.lol/docs/admin/installation/)
 sudo cp deploy/anubis-policy.yaml /etc/anubis/marron-portfolio-policy.yaml
 sudo cp deploy/anubis.env /etc/anubis/marron-portfolio.env
@@ -57,6 +54,25 @@ $EDITOR /etc/nginx/sites-available/marron-portfolio   # server_name / 証明書�
 sudo ln -s /etc/nginx/sites-available/marron-portfolio /etc/nginx/sites-enabled/
 sudo certbot --nginx -d example.com   # まだ証明書が無ければ
 sudo nginx -t && sudo systemctl reload nginx
+```
+
+## Anubisを使わない場合
+
+nginxのHTTPS設定で、`proxy_pass`をHonoのポート(`127.0.0.1:3010`)へ向けます。
+Anubisをすでに起動している場合は、先にnginx設定を切り替えてからAnubisを停止してください。
+
+```bash
+sudo cp deploy/nginx.conf /etc/nginx/sites-available/marron-portfolio
+# server_name、証明書パス、Honoのポートを実環境に合わせて編集
+sudo nginx -t
+sudo systemctl reload nginx
+sudo systemctl disable --now anubis@marron-portfolio
+```
+
+`anubis@marron-portfolio`を停止したあと、Anubis用の`8923`ポートがLISTENしていないことを確認します。
+
+```bash
+sudo ss -tlnp | grep -E ':(8923|3010)\b'
 ```
 
 ## デプロイ更新時 (再ビルド〜反映)
