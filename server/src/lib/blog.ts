@@ -91,7 +91,7 @@ async function fetchFeed({ source, url }: FeedConfig): Promise<BlogPost[]> {
 }
 
 export async function getBlogPosts(limit: number): Promise<BlogPost[]> {
-	const posts = await cached('blog', 'feed-v3', BLOG_TTL_MS, async () => {
+	const posts = await cached('blog', 'feed-v4', BLOG_TTL_MS, async () => {
 		const results = await Promise.allSettled(FEEDS.map((feed) => fetchFeed(feed)));
 		const successful: BlogPost[][] = [];
 		for (const [index, result] of results.entries()) {
